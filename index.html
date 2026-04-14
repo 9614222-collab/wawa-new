@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>와와학습코칭센터</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Malgun Gothic','Noto Sans KR',sans-serif;background:#f7f3f0;color:#222;font-size:14px}
+
+.site-header{background:#C85A2A;padding:14px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo-box{width:56px;height:56px;background:#fff;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.logo-wawa{color:#C85A2A;font-size:13px;font-weight:800;letter-spacing:2px;line-height:1.2}
+.logo-sub{color:#C85A2A;font-size:4.5px;letter-spacing:.5px;text-align:center;line-height:1.4}
+.site-title{color:#fff;font-size:18px;font-weight:600}
+.site-sub{color:#f5d5c5;font-size:12px;margin-top:2px}
+.branch-btns{display:flex;gap:8px;margin-left:auto}
+.branch-btn{padding:8px 20px;border-radius:20px;border:2px solid rgba(255,255,255,.5);background:transparent;color:#fff;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.branch-btn.active{background:#fff;color:#C85A2A;border-color:#fff}
+
+.tabs{display:flex;background:#fff;border-bottom:2px solid #e8d0c4;padding:0 24px;overflow-x:auto}
+.tab{padding:14px 18px;font-size:14px;color:#999;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;font-weight:500}
+.tab.active{color:#C85A2A;border-bottom-color:#C85A2A;font-weight:600}
+
+.wrap{max-width:920px;margin:0 auto;padding:20px 16px}
+.section{display:none}.section.active{display:block}
+
+.card{background:#fff;border-radius:14px;padding:20px 22px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card-title{font-size:15px;font-weight:600;color:#C85A2A;margin-bottom:16px;padding-bottom:10px;border-bottom:1.5px solid #f5e5de;display:flex;align-items:center;gap:8px}
+.card-title::before{content:'';display:inline-block;width:4px;height:16px;background:#C85A2A;border-radius:2px}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:12px;font-weight:600;color:#888}
+.field input[type=text],.field input[type=date],.field textarea,.field select{
+  font-size:14px;color:#222;background:#faf8f6;border:1.5px solid #e8ddd8;border-radius:8px;
+  padding:9px 12px;width:100%;font-family:inherit}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:#C85A2A;background:#fff}
+.field textarea{resize:vertical;min-height:70px;line-height:1.6}
+
+/* 공유 바 */
+.share-bar{background:#fff3ee;border:1.5px solid #f5c4a8;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.user-btn{padding:7px 16px;border-radius:8px;border:1.5px solid #e8ddd8;background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:#888}
+.user-btn.active{background:#C85A2A;color:#fff;border-color:#C85A2A}
+
+/* 정기결제 */
+.pay-section{border:1.5px solid #e8ddd8;border-radius:10px;padding:14px 16px;background:#faf8f6;margin-top:14px}
+.pay-toggle{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.custom-check{width:22px;height:22px;border:2px solid #d0c4bc;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff}
+.custom-check.checked{background:#C85A2A;border-color:#C85A2A}
+.check-mark{color:#fff;font-size:14px;font-weight:700;display:none}
+.custom-check.checked .check-mark{display:block}
+.pay-label{font-size:14px;font-weight:600;color:#444}
+.pay-badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;background:#FAECE7;color:#C85A2A;margin-left:4px}
+.pay-badge.active{background:#C85A2A;color:#fff}
+.pay-detail{margin-top:12px;display:none}
+.pay-detail.show{display:block}
+.pay-methods{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px}
+.pay-method{padding:7px 14px;border:1.5px solid #e0d4cc;border-radius:8px;font-size:13px;cursor:pointer;color:#888;background:#fff}
+.pay-method.selected{border-color:#C85A2A;color:#C85A2A;background:#FAECE7;font-weight:600}
+
+/* 시험 점수 */
+.exam-block{background:#fdf9f7;border:1.5px solid #f0e4de;border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.exam-name-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.exam-name-row input{flex:1;font-size:14px;font-weight:600;padding:8px 12px;border:1.5px solid #e8ddd8;border-radius:8px;background:#fff;font-family:inherit}
+.exam-name-row input:focus{outline:none;border-color:#C85A2A}
+.exam-score-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.score-col{display:flex;flex-direction:column;align-items:center;gap:4px}
+.score-col-label{font-size:11px;font-weight:600;color:#fff;border-radius:6px;padding:4px 0;width:100%;text-align:center}
+.lbl-ko{background:#4A90D9}.lbl-en{background:#2DAA72}.lbl-ma{background:#9B59B6}
+.lbl-so{background:#E67E22}.lbl-sc{background:#E84393}.lbl-et{background:#888}.lbl-total{background:#C85A2A}
+.score-col input{width:100%;font-size:14px;font-weight:600;text-align:center;padding:7px 4px;border:1.5px solid #e8ddd8;border-radius:7px;background:#fff;font-family:inherit}
+.score-col input:focus{outline:none;border-color:#C85A2A}
+.total-val{font-size:15px;font-weight:700;color:#C85A2A;text-align:center;padding:7px 4px;width:100%;background:#FAECE7;border-radius:7px}
+
+/* 시간표 */
+.tt-input-wrap{overflow-x:auto}
+.tt-input-table{width:100%;border-collapse:separate;border-spacing:4px;min-width:480px}
+.tt-input-table th{font-size:12px;font-weight:600;text-align:center;padding:7px 4px;border-radius:6px;color:#fff}
+.th-mon{background:#4A90D9}.th-tue{background:#2DAA72}.th-wed{background:#9B59B6}
+.th-thu{background:#E67E22}.th-fri{background:#E84393}.th-sat{background:#16A085}
+.tt-cell-input{font-size:12px;padding:7px 5px;border:1.5px solid #e8ddd8;border-radius:7px;text-align:center;width:100%;background:#faf8f6;font-family:inherit}
+.tt-cell-input:focus{outline:none;border-color:#C85A2A;background:#fff}
+.color-pick{width:28px;height:28px;border:none;border-radius:6px;cursor:pointer;padding:1px;background:none}
+
+/* 과목 회비 / 강사 */
+.fee-row,.teacher-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.fee-row input,.teacher-row input{flex:1;font-size:13px;padding:7px 10px;background:#faf8f6;border:1.5px solid #e8ddd8;border-radius:8px;font-family:inherit}
+.fee-row input:focus,.teacher-row input:focus{outline:none;border-color:#C85A2A}
+
+/* 버튼 */
+.btn-add{font-size:13px;padding:7px 15px;border:1.5px solid #C85A2A;color:#C85A2A;border-radius:8px;background:#fff;cursor:pointer;font-weight:500}
+.btn-add:hover{background:#FAECE7}
+.btn-primary{font-size:14px;padding:11px 28px;background:#C85A2A;color:#fff;border:none;border-radius:9px;cursor:pointer;font-weight:600}
+.btn-primary:hover{background:#993C1D}
+.btn-secondary{font-size:14px;padding:11px 22px;background:#fff;color:#888;border:1.5px solid #ddd;border-radius:9px;cursor:pointer}
+.btn-ghost{font-size:13px;padding:8px 16px;background:#fff;border:1.5px solid #ddd;border-radius:8px;cursor:pointer;color:#666}
+.btn-ghost:hover{background:#f5f5f5}
+.btn-print{font-size:13px;padding:8px 16px;background:#C85A2A;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:500}
+.btn-del{background:none;border:none;color:#e08080;cursor:pointer;font-size:18px;line-height:1;padding:0 2px;flex-shrink:0}
+.row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;justify-content:flex-end}
+.success-msg{background:#eaf3de;color:#3B6D11;border-radius:9px;padding:11px 16px;font-size:14px;margin-top:12px;display:none;border:1px solid #c0dd97}
+
+/* 시간표 카드 */
+.tt-wrapper{background:linear-gradient(135deg,#fff5f0 0%,#fff 55%,#eef4ff 100%);border-radius:18px;padding:22px;max-width:500px;margin:0 auto;position:relative;overflow:hidden;box-shadow:0 0 0 3px #C8A84B,0 0 0 5px #F0D080,0 0 0 7px #C8A84B}
+.tt-deco1{position:absolute;top:-28px;right:-28px;width:110px;height:110px;background:#C85A2A;opacity:.07;border-radius:50%}
+.tt-deco2{position:absolute;bottom:-18px;left:-18px;width:75px;height:75px;background:#4A90D9;opacity:.07;border-radius:50%}
+.tt-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;position:relative;z-index:1}
+.tt-logo{width:50px;height:50px;background:#C85A2A;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.tt-logo span{color:#fff;font-size:12px;font-weight:800;letter-spacing:1px;line-height:1.2}
+.tt-logo small{color:#fff;font-size:4.5px;letter-spacing:.5px}
+.tt-student{font-size:19px;font-weight:700;color:#C85A2A}
+.tt-school{font-size:12px;color:#aaa;margin-top:2px}
+.tt-period{font-size:11px;color:#ccc;margin-top:1px}
+.tt-table{width:100%;border-collapse:separate;border-spacing:0 5px;position:relative;z-index:1}
+.tt-table th{padding:8px 5px;font-size:12px;font-weight:600;text-align:center;color:#fff}
+.tt-table th:first-child{border-radius:9px 0 0 9px}
+.tt-table th:last-child{border-radius:0 9px 9px 0}
+.tt-table td{padding:7px 5px;font-size:11px;text-align:center;background:#fff}
+.tt-table td:first-child{border-radius:7px 0 0 7px;font-weight:700;font-size:10px;padding:7px 5px}
+.tt-table td:last-child{border-radius:0 7px 7px 0}
+.time-badge{display:inline-block;padding:3px 6px;border-radius:6px;color:#fff;font-size:10px;font-weight:600;line-height:1.3}
+.tt-footer{margin-top:14px;display:flex;justify-content:space-between;align-items:center;padding-top:11px;border-top:1.5px dashed #e8d5cc;position:relative;z-index:1}
+.tt-footer-name{font-size:12px;color:#C85A2A;font-weight:700}
+.tt-footer-note{font-size:10px;color:#bbb}
+
+/* 카카오 */
+.kakao-wrap{background:#FEE500;border-radius:14px;padding:20px;max-width:480px;margin:0 auto}
+.kakao-text{font-size:13px;color:#3C1E1E;line-height:1.9;white-space:pre-wrap;word-break:break-all;font-family:'Malgun Gothic',sans-serif}
+.copy-btn{display:flex;align-items:center;justify-content:center;margin:14px auto 0;padding:10px 22px;background:#3C1E1E;color:#FEE500;border:none;border-radius:9px;cursor:pointer;font-size:14px;font-weight:600;max-width:230px}
+
+/* 목록 */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.filter-label{font-size:12px;font-weight:600;color:#aaa}
+.filter-btn{padding:6px 14px;border-radius:20px;border:1.5px solid #e8ddd8;background:#fff;font-size:13px;color:#888;cursor:pointer}
+.filter-btn.active{background:#C85A2A;color:#fff;border-color:#C85A2A}
+.student-table{width:100%;border-collapse:collapse;font-size:13px}
+.student-table th{background:#faf0eb;padding:10px 12px;text-align:left;font-weight:600;color:#C85A2A;border-bottom:1.5px solid #f0ddd5;white-space:nowrap;cursor:pointer;user-select:none}
+.student-table td{padding:10px 12px;border-bottom:1px solid #f5ede8;color:#333;vertical-align:top}
+.student-table tr:hover td{background:#fdf8f6}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:#FAECE7;color:#C85A2A}
+.badge-ok{background:#e1f5ee;color:#0f6e56}
+.badge-no{background:#fce8e8;color:#a32d2d}
+.branch-tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.branch-sinchang{background:#FAECE7;color:#C85A2A}
+.branch-seonun{background:#E6F1FB;color:#185FA5}
+.empty{text-align:center;padding:2.5rem;color:#bbb;font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="site-header" id="siteHeader">
+  <div class="logo-box">
+    <div class="logo-wawa">WAWA</div>
+    <div class="logo-sub">와와학습코칭센터</div>
+    <div class="logo-sub">COACHING CENTER</div>
+  </div>
+  <div>
+    <div class="site-title">와와학습코칭센터</div>
+    <div class="site-sub" id="headerBranch">신창점</div>
+  </div>
+  <div class="branch-btns">
+    <button class="branch-btn active" id="btn-sinchang" onclick="setBranch('sinchang')">📍 신창점</button>
+    <button class="branch-btn" id="btn-seonun" onclick="setBranch('seonun')">📍 선운점</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('register')">신규 등록</div>
+  <div class="tab" onclick="showTab('timetable')">시간표 미리보기</div>
+  <div class="tab" onclick="showTab('kakao')">카카오톡 안내문</div>
+  <div class="tab" onclick="showTab('list')">학생 목록</div>
+</div>
+
+<div class="wrap">
+
+  <!-- ① 신규 등록 -->
+  <div class="section active" id="tab-register">
+    <div class="share-bar">
+      <span style="font-size:13px;font-weight:600;color:#C85A2A;flex-shrink:0">현재 사용자:</span>
+      <div id="userBtns" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      <span style="font-size:12px;color:#aaa;margin-left:auto">5명이 함께 사용</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">기본 정보</div>
+      <div class="g2" style="margin-bottom:14px">
+        <div class="field"><label>학생 이름 *</label><input type="text" id="sName" placeholder="이름 입력"></div>
+        <div class="field"><label>학교명 / 학년</label><input type="text" id="sSchool" placeholder="예) 광주초등학교 3학년"></div>
+        <div class="field"><label>입회일</label><input type="date" id="sJoin"></div>
+        <div class="field"><label>첫 등록일</label><input type="date" id="sStart"></div>
+        <div class="field"><label>입금 여부</label>
+          <select id="sPaid">
+            <option value="no">미입금</option>
+            <option value="ok">입금 완료</option>
+          </select>
+        </div>
+        <div class="field"><label>입금일</label><input type="date" id="sPaidDate"></div>
+      </div>
+      <div class="g2" style="margin-bottom:14px">
+        <div class="field"><label>홈페이지 아이디</label><input type="text" id="hpId" placeholder="예) bag0754012"></div>
+        <div class="field"><label>홈페이지 비밀번호</label><input type="text" id="hpPw" placeholder="예) aaaaa00000"></div>
+      </div>
+      <div class="pay-section">
+        <div class="pay-toggle" onclick="togglePay()">
+          <div class="custom-check" id="payCheck"><span class="check-mark">✓</span></div>
+          <span class="pay-label">정기결제</span>
+          <span class="pay-badge" id="payBadge">미설정</span>
+        </div>
+        <div class="pay-detail" id="payDetail">
+          <div style="font-size:12px;font-weight:600;color:#888;margin-top:12px;margin-bottom:6px">결제 수단</div>
+          <div class="pay-methods">
+            <div class="pay-method" onclick="selectPayMethod(this,'카드 자동결제')">카드 자동결제</div>
+            <div class="pay-method" onclick="selectPayMethod(this,'CMS 자동이체')">CMS 자동이체</div>
+            <div class="pay-method" onclick="selectPayMethod(this,'계좌 자동이체')">계좌 자동이체</div>
+            <div class="pay-method" onclick="selectPayMethod(this,'현금 정기납부')">현금 정기납부</div>
+          </div>
+          <div class="field"><label>메모</label><input type="text" id="payMemo" placeholder="예) 카드 뒷 4자리 1234"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">시험 점수</div>
+      <div id="examBlocks"></div>
+      <button class="btn-add" onclick="addExamBlock()">+ 시험 추가</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">목표 및 상담 내용</div>
+      <div class="field" style="margin-bottom:12px">
+        <label>학생 목표</label>
+        <textarea id="sGoal" placeholder="예) 수학 90점 이상, 자기주도학습 습관 만들기"></textarea>
+      </div>
+      <div class="field">
+        <label>상담 내용</label>
+        <textarea id="sCounsel" placeholder="학부모 상담 내용, 학생 특이사항 등"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">수업 시간표</div>
+      <div class="field" style="margin-bottom:12px">
+        <label>학생 이름 (시간표 표시용)</label>
+        <input type="text" id="ttStudentName" placeholder="예) 김서준 학생">
+      </div>
+      <div class="tt-input-wrap">
+        <table class="tt-input-table">
+          <thead>
+            <tr>
+              <th style="background:#C85A2A;width:32px">색</th>
+              <th class="th-mon">월</th><th class="th-tue">화</th>
+              <th class="th-wed">수</th><th class="th-thu">목</th>
+              <th class="th-fri">금</th><th class="th-sat">토</th>
+              <th style="background:#ccc;width:28px"></th>
+            </tr>
+          </thead>
+          <tbody id="timeRows"></tbody>
+        </table>
+      </div>
+      <button class="btn-add" style="margin-top:10px" onclick="addTimeRow()">+ 행 추가</button>
+      <p style="font-size:12px;color:#aaa;margin-top:8px">예) 7:00-8:00(영어) 형식으로 입력하세요</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">교육비 안내</div>
+      <div style="font-size:13px;font-weight:600;color:#888;margin-bottom:8px">과목별 회비</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 28px;gap:8px;margin-bottom:6px">
+        <span style="font-size:12px;color:#aaa;font-weight:600">과목</span>
+        <span style="font-size:12px;color:#aaa;font-weight:600">납부일</span>
+        <span style="font-size:12px;color:#aaa;font-weight:600">금액</span><span></span>
+      </div>
+      <div id="feeRows"></div>
+      <button class="btn-add" onclick="addFeeRow()">+ 과목 추가</button>
+      <div style="font-size:13px;font-weight:600;color:#888;margin:16px 0 8px">담당 강사</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 28px;gap:8px;margin-bottom:6px">
+        <span style="font-size:12px;color:#aaa;font-weight:600">과목</span>
+        <span style="font-size:12px;color:#aaa;font-weight:600">강사명</span><span></span>
+      </div>
+      <div id="teacherRows"></div>
+      <button class="btn-add" onclick="addTeacherRow()">+ 강사 추가</button>
+      <div class="field" style="margin-top:16px">
+        <label>납부 계좌</label>
+        <input type="text" id="sAccount" placeholder="예) 국민은행 123-456-789012 와와학습코칭센터">
+      </div>
+    </div>
+
+    <div class="row-actions">
+      <button class="btn-secondary" onclick="resetForm()">초기화</button>
+      <button class="btn-primary" onclick="saveStudent()">학생 저장하기</button>
+    </div>
+    <div class="success-msg" id="successMsg">✅ 저장되었습니다!</div>
+  </div>
+
+  <!-- ② 시간표 -->
+  <div class="section" id="tab-timetable">
+    <div class="card">
+      <div class="card-title">학부모 발송용 시간표 카드</div>
+      <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:13px;color:#888">학생 선택:</span>
+        <div id="ttStudentBtns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
+      <div id="ttPreview"><div class="empty">정보를 입력하면 시간표가 나타납니다.</div></div>
+      <div class="row-actions" style="margin-top:14px">
+        <button class="btn-ghost" onclick="copyTimetableText()">텍스트 복사</button>
+        <button class="btn-print" onclick="printCard()">🖨 이미지로 저장 / 인쇄</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ 카카오톡 -->
+  <div class="section" id="tab-kakao">
+    <div class="card">
+      <div class="card-title">카카오톡 교육비 안내문</div>
+      <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:13px;color:#888">학생 선택:</span>
+        <div id="kakaoStudentBtns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
+      <div class="kakao-wrap">
+        <div class="kakao-text" id="kakaoText">학생 정보를 입력하면 안내문이 생성됩니다.</div>
+      </div>
+      <button class="copy-btn" onclick="copyKakao()">카카오톡으로 복사하기</button>
+    </div>
+  </div>
+
+  <!-- ④ 학생 목록 -->
+  <div class="section" id="tab-list">
+    <div class="card">
+      <div class="card-title">등록 학생 목록</div>
+      <div class="filter-bar">
+        <span class="filter-label">입금:</span>
+        <button class="filter-btn active" onclick="setFilter('all',this)">전체</button>
+        <button class="filter-btn" onclick="setFilter('ok',this)">입금</button>
+        <button class="filter-btn" onclick="setFilter('no',this)">미입금</button>
+      </div>
+      <div class="filter-bar" style="margin-top:-4px">
+        <span class="filter-label">정렬:</span>
+        <button class="filter-btn active" onclick="setSort('name',this)">이름순</button>
+        <button class="filter-btn" onclick="setSort('school',this)">학교순</button>
+        <button class="filter-btn" onclick="setSort('pay',this)">입금 먼저</button>
+        <button class="filter-btn" onclick="setSort('nopay',this)">미입금 먼저</button>
+      </div>
+      <div id="studentList"><div class="empty">등록된 학생이 없습니다.</div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── 전역 상태 ──
+var students = JSON.parse(localStorage.getItem('wawaStudents')||'[]');
+var currentUser = localStorage.getItem('wawaUser')||'선생님1';
+var currentBranch = localStorage.getItem('wawaBranch')||'sinchang';
+var payEnabled = false;
+var payMethod = '';
+var examCount = 0, timeRowCount = 0;
+var listFilter = 'all', listSort = 'name';
+var kakaoMode = 'form'; // 'form' or student id
+
+var COLORS = ['#C85A2A','#4A90D9','#2DAA72','#9B59B6','#E67E22','#E84393','#16A085','#2C3E50'];
+var DAY_COLORS = ['#4A90D9','#2DAA72','#9B59B6','#E67E22','#E84393','#16A085'];
+var SUBJ_KEYS = ['ko','en','ma','so','sc','et'];
+var SUBJ_NAMES = ['국어','영어','수학','사회','과학','기타'];
+var SUBJ_LBLS = ['lbl-ko','lbl-en','lbl-ma','lbl-so','lbl-sc','lbl-et'];
+
+function save(){ localStorage.setItem('wawaStudents', JSON.stringify(students)); }
+
+// ── 사용자 ──
+function initUserBtns(){
+  var el = document.getElementById('userBtns');
+  var users = ['선생님1','선생님2','선생님3','선생님4','선생님5'];
+  el.innerHTML = users.map(function(u){
+    return '<button class="user-btn'+(u===currentUser?' active':'')+'" onclick="setUser(\''+u+'\')">'+u+'</button>';
+  }).join('');
+}
+function setUser(u){
+  currentUser = u;
+  localStorage.setItem('wawaUser', u);
+  document.querySelectorAll('.user-btn').forEach(function(b){ b.classList.toggle('active', b.textContent===u); });
+}
+
+// ── 지점 ──
+var BRANCH_NAMES = {sinchang:'신창점', seonun:'선운점'};
+var BRANCH_COLORS = {sinchang:'#C85A2A', seonun:'#185FA5'};
+function setBranch(b){
+  currentBranch = b;
+  localStorage.setItem('wawaBranch', b);
+  document.getElementById('headerBranch').textContent = BRANCH_NAMES[b];
+  document.getElementById('siteHeader').style.background = BRANCH_COLORS[b];
+  document.getElementById('btn-sinchang').classList.toggle('active', b==='sinchang');
+  document.getElementById('btn-seonun').classList.toggle('active', b==='seonun');
+  if(document.getElementById('tab-list').classList.contains('active')) renderList();
+}
+
+// ── 탭 ──
+function showTab(t){
+  document.querySelectorAll('.tab').forEach(function(b,i){
+    b.classList.toggle('active', ['register','timetable','kakao','list'][i]===t);
+  });
+  document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='timetable'){ buildStudentBtns('ttStudentBtns','tt'); renderTT(getFormData()); }
+  if(t==='kakao'){ kakaoMode='form'; buildStudentBtns('kakaoStudentBtns','kk'); buildKakao(getFormData()); }
+  if(t==='list'){ renderList(); }
+}
+
+function buildStudentBtns(elId, prefix){
+  var el = document.getElementById(elId);
+  var btns = '<button class="user-btn active" onclick="selectPreview(null,\''+prefix+'\')">현재 입력중</button>';
+  students.forEach(function(s){
+    btns += '<button class="user-btn" onclick="selectPreview('+s.id+',\''+prefix+'\')">'+s.name+'</button>';
+  });
+  el.innerHTML = btns;
+}
+function selectPreview(id, prefix){
+  var elId = prefix==='tt' ? 'ttStudentBtns' : 'kakaoStudentBtns';
+  document.querySelectorAll('#'+elId+' .user-btn').forEach(function(b){
+    b.classList.toggle('active', id===null ? b.textContent==='현재 입력중' : (id!==null && b.textContent===(students.find(function(s){return s.id===id;})||{}).name));
+  });
+  var data = id===null ? getFormData() : students.find(function(s){return s.id===id;});
+  if(!data) return;
+  if(prefix==='tt') renderTT(data);
+  else buildKakao(data);
+}
+
+// ── 정기결제 ──
+function togglePay(){
+  payEnabled = !payEnabled;
+  document.getElementById('payCheck').classList.toggle('checked', payEnabled);
+  document.getElementById('payDetail').classList.toggle('show', payEnabled);
+  var b = document.getElementById('payBadge');
+  b.textContent = payEnabled ? '설정됨' : '미설정';
+  b.classList.toggle('active', payEnabled);
+}
+function selectPayMethod(el, val){
+  document.querySelectorAll('.pay-method').forEach(function(e){ e.classList.remove('selected'); });
+  el.classList.add('selected');
+  payMethod = val;
+}
+
+// ── 시험 ──
+function addExamBlock(){
+  examCount++;
+  var id = 'exam-'+examCount;
+  var div = document.createElement('div');
+  div.className = 'exam-block'; div.id = id;
+  var cols = '';
+  SUBJ_KEYS.forEach(function(k, i){
+    cols += '<div class="score-col"><div class="score-col-label '+SUBJ_LBLS[i]+'">'+SUBJ_NAMES[i]+'</div>'
+      +'<input type="text" placeholder="—" data-subj="'+k+'" oninput="calcTotal(\''+id+'\')"></div>';
+  });
+  cols += '<div class="score-col"><div class="score-col-label lbl-total">합계</div><div class="total-val" id="tot-'+id+'">—</div></div>';
+  div.innerHTML = '<div class="exam-name-row"><input type="text" placeholder="시험명 (예: 2025년 1학기 중간고사)">'
+    +'<button class="btn-del" onclick="document.getElementById(\''+id+'\').remove()">×</button></div>'
+    +'<div class="exam-score-grid">'+cols+'</div>';
+  document.getElementById('examBlocks').appendChild(div);
+}
+function calcTotal(id){
+  var block = document.getElementById(id);
+  var total = 0, any = false;
+  block.querySelectorAll('input[data-subj]').forEach(function(i){ if(i.value.trim()!==''){any=true;total+=parseFloat(i.value)||0;} });
+  document.getElementById('tot-'+id).textContent = any ? total : '—';
+}
+function getExams(){
+  return Array.from(document.querySelectorAll('.exam-block')).map(function(b){
+    var name = b.querySelector('.exam-name-row input').value;
+    var scores = {};
+    b.querySelectorAll('input[data-subj]').forEach(function(i){ scores[i.dataset.subj]=i.value; });
+    return {examName:name, scores:scores};
+  }).filter(function(e){ return e.examName || Object.values(e.scores).some(function(v){return v;}); });
+}
+
+// ── 시간표 행 ──
+function addTimeRow(){
+  timeRowCount++;
+  var id = 'tr-'+timeRowCount;
+  var c = COLORS[(timeRowCount-1)%COLORS.length];
+  var tr = document.createElement('tr'); tr.id = id;
+  var tds = '';
+  for(var i=0;i<6;i++) tds += '<td><input class="tt-cell-input" placeholder="—"></td>';
+  tr.innerHTML = '<td><input type="color" value="'+c+'" class="color-pick"></td>'+tds
+    +'<td><button class="btn-del" onclick="document.getElementById(\''+id+'\').remove()">×</button></td>';
+  document.getElementById('timeRows').appendChild(tr);
+}
+function getTimeRows(){
+  return Array.from(document.querySelectorAll('#timeRows tr')).map(function(r){
+    var color = r.querySelector('input[type=color]').value;
+    var times = Array.from(r.querySelectorAll('.tt-cell-input')).map(function(i){return i.value;});
+    return {color:color, times:times};
+  });
+}
+
+// ── 과목 회비 / 강사 ──
+function addFeeRow(){
+  var div = document.createElement('div');
+  div.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 1fr 28px;gap:8px;margin-bottom:8px;align-items:center';
+  div.innerHTML = '<input type="text" style="font-size:13px;padding:7px 10px;background:#faf8f6;border:1.5px solid #e8ddd8;border-radius:8px;font-family:inherit" placeholder="과목 (예: 국어)">'
+    +'<input type="text" style="font-size:13px;padding:7px 10px;background:#faf8f6;border:1.5px solid #e8ddd8;border-radius:8px;font-family:inherit" placeholder="납부일 (예: 29일)">'
+    +'<input type="text" style="font-size:13px;padding:7px 10px;background:#faf8f6;border:1.5px solid #e8ddd8;border-radius:8px;font-family:inherit" placeholder="금액 (예: 152,000원)">'
+    +'<button class="btn-del" onclick="this.parentElement.remove()">×</button>';
+  document.getElementById('feeRows').appendChild(div);
+}
+function addTeacherRow(){
+  var div = document.createElement('div');
+  div.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 28px;gap:8px;margin-bottom:8px;align-items:center';
+  div.innerHTML = '<input type="text" style="font-size:13px;padding:7px 10px;background:#faf8f6;border:1.5px solid #e8ddd8;border-radius:8px;font-family:inherit" placeholder="과목 (예: 국어)">'
+    +'<input type="text" style="font-size:13px;padding:7px 10px;background:#faf8f6;border:1.5px solid #e8ddd8;border-radius:8px;font-family:inherit" placeholder="강사명 (예: 이하림 강사)">'
+    +'<button class="btn-del" onclick="this.parentElement.remove()">×</button>';
+  document.getElementById('teacherRows').appendChild(div);
+}
+function getFees(){
+  return Array.from(document.querySelectorAll('#feeRows > div')).map(function(r){
+    var ins = r.querySelectorAll('input');
+    return {subj:ins[0].value, day:ins[1].value, amount:ins[2].value};
+  }).filter(function(f){return f.subj;});
+}
+function getTeachers(){
+  return Array.from(document.querySelectorAll('#teacherRows > div')).map(function(r){
+    var ins = r.querySelectorAll('input');
+    return {subj:ins[0].value, name:ins[1].value};
+  }).filter(function(t){return t.subj;});
+}
+
+// ── 폼 데이터 수집 ──
+function getFormData(){
+  return {
+    id: null,
+    name: document.getElementById('sName').value.trim(),
+    school: document.getElementById('sSchool').value,
+    join: document.getElementById('sJoin').value,
+    start: document.getElementById('sStart').value,
+    paid: document.getElementById('sPaid').value,
+    paidDate: document.getElementById('sPaidDate').value,
+    hpId: document.getElementById('hpId').value,
+    hpPw: document.getElementById('hpPw').value,
+    ttName: document.getElementById('ttStudentName').value,
+    goal: document.getElementById('sGoal').value,
+    counsel: document.getElementById('sCounsel').value,
+    account: document.getElementById('sAccount').value,
+    payEnabled: payEnabled,
+    payMethod: payMethod,
+    payMemo: (document.getElementById('payMemo')||{}).value||'',
+    exams: getExams(),
+    timetable: getTimeRows(),
+    fees: getFees(),
+    teachers: getTeachers(),
+    savedBy: currentUser,
+    branch: currentBranch
+  };
+}
+
+// ── 저장 ──
+function saveStudent(){
+  var name = document.getElementById('sName').value.trim();
+  if(!name){alert('학생 이름을 입력해 주세요.');return;}
+  var data = getFormData(); data.id = Date.now();
+  var idx = students.findIndex(function(s){return s.name===name;});
+  if(idx>=0){ if(!confirm('"'+name+'" 학생 정보가 있습니다. 덮어쓸까요?'))return; students[idx]=data; }
+  else students.unshift(data);
+  save();
+  var m = document.getElementById('successMsg');
+  m.style.display='block'; setTimeout(function(){m.style.display='none';},3000);
+}
+function resetForm(){
+  ['sName','sSchool','sJoin','sStart','hpId','hpPw','ttStudentName','sGoal','sCounsel','sAccount'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('sPaid').value='no';
+  document.getElementById('sPaidDate').value='';
+  if(document.getElementById('payMemo')) document.getElementById('payMemo').value='';
+  document.getElementById('examBlocks').innerHTML='';
+  document.getElementById('timeRows').innerHTML='';
+  document.getElementById('feeRows').innerHTML='';
+  document.getElementById('teacherRows').innerHTML='';
+  examCount=0; timeRowCount=0;
+  if(payEnabled) togglePay();
+  document.querySelectorAll('.pay-method').forEach(function(e){e.classList.remove('selected');}); payMethod='';
+}
+
+// ── 카카오톡 안내문 ──
+function buildKakao(data){
+  var name = data.name || '(학생 이름)';
+  var hpId = data.hpId || '(아이디)';
+  var hpPw = data.hpPw || '(비밀번호)';
+  var fees = data.fees || [];
+  var teachers = data.teachers || [];
+
+  var feeStr = fees.length
+    ? fees.map(function(f){return f.subj+' '+f.day+' '+f.amount;}).join('/ ')
+    : '(회비 정보 입력)';
+
+  var teacherStr = teachers.length
+    ? teachers.map(function(t){return '  '+t.subj+' : '+t.name;}).join('\n')
+    : '  (강사 정보 입력)';
+
+  var msg = '[WAWA 코칭학원 수업 및 학원비 납부안내]\n\n'
+    +'■이름 : '+name+'\n'
+    +'■회비: '+feeStr+'\n'
+    +'■담당강사\n'+teacherStr+'\n'
+    +'■홈페이지 \n'
+    +'   www.sscoaching.co.kr\n'
+    +' - 회원아이디 : '+hpId+'\n'
+    +' - 비밀번호 : '+hpPw+'\n\n'
+    +'■ 결제 방식\n'
+    +'>> 정기결제\n'
+    +'  상상코칭 홈페이지 (https://www.sscoaching.co.kr) 접속 -> 로그인 클릭 후 위의 아이디 비밀번호 입력 후 접속 -> 마이페이지 -> 결제 -> 정기결제 신청\n\n'
+    +'📹 정기결제 등록 방법 영상\n'
+    +'https://www.youtube.com/watch?app=desktop&v=IU3t3kwDtAM&feature=youtu.be\n'
+    +'(영상을 참고하여 등록해주시면, 매번 접속하실 필요 없이 결제 가능하십니다)\n'
+    +'*회원정보수정에서 현금영수증 등록가능\n'
+    +'#참고 사항 \n'
+    +'카드결제 안될시 고객센터 1899-2277 문의하시면 결제 진행 도와드립니다.\n'
+    +'--------------------------------------------\n'
+    +'*부득이한 사정으로 결강 시 사전에 미리 말씀 부탁드립니다.\n'
+    +'*지각 및 무단 결강은 학습습관 형성에 좋지 않은 영향을 줍니다.  당일 무단 결강은 보강이 어려우며, 적어도 하루 전 사전공지 혹은 학부모님께서 연락을 주셨을 시에 보강 조율 가능하다는 점 미리 확인 부탁 드립니다.\n'
+    +'*수업중에는 빠른 답변이 어려울 수 있으니 양해 바랍니다.';
+
+  document.getElementById('kakaoText').textContent = msg;
+}
+function copyKakao(){
+  var txt = document.getElementById('kakaoText').textContent;
+  navigator.clipboard.writeText(txt).then(function(){alert('복사 완료!\n카카오톡을 열고 붙여넣기 해주세요.');});
+}
+
+// ── 시간표 렌더링 ──
+function hexRgba(hex,a){
+  var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return 'rgba('+r+','+g+','+b+','+a+')';
+}
+function renderTT(data){
+  var trows = (data.timetable||[]).filter(function(r){return r.times.some(function(t){return t&&t!=='—';});});
+  var el = document.getElementById('ttPreview');
+  var displayName = data.ttName || (data.name ? data.name+' 학생' : '학생');
+  if(!trows.length){el.innerHTML='<div class="empty">시간표 정보를 입력하면 카드가 생성됩니다.</div>';return;}
+  var days=['월','화','수','목','금','토'];
+  var ths='<th style="background:#f5ede8;color:#C85A2A;border-radius:9px 0 0 9px;min-width:44px">시간</th>';
+  days.forEach(function(d,i){ths+='<th style="background:'+DAY_COLORS[i]+';'+(i===5?'border-radius:0 9px 9px 0':'')+';min-width:46px">'+d+'</th>';});
+  var tds='';
+  trows.forEach(function(r){
+    var c=r.color;
+    var row='<td style="background:'+hexRgba(c,.12)+';color:'+c+';border-radius:7px 0 0 7px;font-size:10px"></td>';
+    r.times.forEach(function(t,di){
+      var last=di===5, has=t&&t!=='—'&&t!=='';
+      row+='<td style="background:'+(has?hexRgba(c,.1):'#fff')+';border-radius:'+(last?'0 7px 7px 0':'0')+'">'+
+        (has?'<span class="time-badge" style="background:'+c+'">'+t+'</span>':'<span style="color:#e0e0e0">—</span>')+'</td>';
+    });
+    tds+='<tr>'+row+'</tr>';
+  });
+  el.innerHTML='<div class="tt-wrapper" id="ttCard">'
+    +'<div class="tt-deco1"></div><div class="tt-deco2"></div>'
+    +'<div class="tt-head"><div class="tt-logo"><span>WAWA</span><small>와와학습코칭센터</small></div>'
+    +'<div><div class="tt-student">'+displayName+'</div><div class="tt-school">'+(data.school||'')+'</div>'
+    +'<div class="tt-period">'+(data.join?'등록일: '+data.join:'')+'</div></div></div>'
+    +'<table class="tt-table"><thead><tr>'+ths+'</tr></thead><tbody>'+tds+'</tbody></table>'
+    +'<div class="tt-footer"><div class="tt-footer-name">와와학습코칭센터</div><div class="tt-footer-note">COACHING CENTER</div></div>'
+    +'</div>';
+}
+function copyTimetableText(){
+  var data=getFormData();
+  var trows=(data.timetable||[]).filter(function(r){return r.times.some(function(t){return t&&t!=='—';});});
+  if(!trows.length){alert('시간표 정보가 없습니다.');return;}
+  var txt='[와와학습코칭센터] '+(data.ttName||data.name||'학생')+' 수업 시간표\n\n\t월\t화\t수\t목\t금\t토\n';
+  trows.forEach(function(r,i){txt+=(i+1)+'\t'+r.times.join('\t')+'\n';});
+  navigator.clipboard.writeText(txt).then(function(){alert('복사되었습니다!');});
+}
+function printCard(){
+  var card=document.getElementById('ttCard');
+  if(!card){alert('시간표를 먼저 생성해 주세요.');return;}
+  var w=window.open('','_blank','width=620,height=700');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>시간표</title><style>'
+    +'*{box-sizing:border-box;margin:0;padding:0}body{background:#f7f3f0;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:\'Malgun Gothic\',sans-serif;padding:20px}'
+    +'.tt-wrapper{background:linear-gradient(135deg,#fff5f0 0%,#fff 55%,#eef4ff 100%);border-radius:18px;padding:22px;width:500px;position:relative;overflow:hidden;box-shadow:0 0 0 3px #C8A84B,0 0 0 5px #F0D080,0 0 0 7px #C8A84B}'
+    +'.tt-deco1{position:absolute;top:-28px;right:-28px;width:110px;height:110px;background:#C85A2A;opacity:.07;border-radius:50%}'
+    +'.tt-deco2{position:absolute;bottom:-18px;left:-18px;width:75px;height:75px;background:#4A90D9;opacity:.07;border-radius:50%}'
+    +'.tt-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;position:relative;z-index:1}'
+    +'.tt-logo{width:50px;height:50px;background:#C85A2A;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}'
+    +'.tt-logo span{color:#fff;font-size:12px;font-weight:800;letter-spacing:1px;line-height:1.2}'
+    +'.tt-logo small{color:#fff;font-size:4.5px;letter-spacing:.5px}'
+    +'.tt-student{font-size:19px;font-weight:700;color:#C85A2A}.tt-school{font-size:12px;color:#aaa;margin-top:2px}.tt-period{font-size:11px;color:#ccc;margin-top:1px}'
+    +'.tt-table{width:100%;border-collapse:separate;border-spacing:0 5px;position:relative;z-index:1}'
+    +'.tt-table th{padding:8px 5px;font-size:12px;font-weight:600;text-align:center;color:#fff}'
+    +'.tt-table th:first-child{border-radius:9px 0 0 9px}.tt-table th:last-child{border-radius:0 9px 9px 0}'
+    +'.tt-table td{padding:7px 5px;font-size:11px;text-align:center;background:#fff}'
+    +'.tt-table td:first-child{border-radius:7px 0 0 7px;font-size:10px;padding:7px 5px}.tt-table td:last-child{border-radius:0 7px 7px 0}'
+    +'.time-badge{display:inline-block;padding:3px 6px;border-radius:6px;color:#fff;font-size:10px;font-weight:600;line-height:1.3}'
+    +'.tt-footer{margin-top:14px;display:flex;justify-content:space-between;align-items:center;padding-top:11px;border-top:1.5px dashed #e8d5cc;position:relative;z-index:1}'
+    +'.tt-footer-name{font-size:12px;color:#C85A2A;font-weight:700}.tt-footer-note{font-size:10px;color:#bbb}'
+    +'@media print{body{background:#fff;padding:0;display:block}.tt-wrapper{width:100%;border-radius:0}}'
+    +'</style></head><body>'+card.outerHTML+'<script>window.onload=function(){window.print();}<\/script></body></html>');
+  w.document.close();
+}
+
+// ── 목록 ──
+function setFilter(val,el){
+  listFilter=val;
+  document.querySelectorAll('.filter-bar:first-of-type .filter-btn').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active'); renderList();
+}
+function setSort(val,el){
+  listSort=val;
+  document.querySelectorAll('.filter-bar:nth-of-type(2) .filter-btn').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active'); renderList();
+}
+function renderList(){
+  var el=document.getElementById('studentList');
+  var list=students.filter(function(s){
+    if(s.branch && s.branch!==currentBranch) return false;
+    if(listFilter==='all') return true;
+    return (s.paid||'no')===listFilter;
+  });
+  if(!list.length){el.innerHTML='<div class="empty">해당 조건의 학생이 없습니다.</div>';return;}
+  list=list.slice().sort(function(a,b){
+    if(listSort==='name') return (a.name||'').localeCompare(b.name||'','ko');
+    if(listSort==='school') return (a.school||'').localeCompare(b.school||'','ko');
+    if(listSort==='pay'){ var pa=a.paid==='ok'?0:1,pb=b.paid==='ok'?0:1; return pa-pb; }
+    if(listSort==='nopay'){ var pa=a.paid==='ok'?1:0,pb=b.paid==='ok'?1:0; return pa-pb; }
+    return 0;
+  });
+  var rows=list.map(function(s){
+    var ok=s.paid==='ok';
+    var payBadge=ok?'<span class="badge badge-ok">✓ 입금완료</span>'+(s.paidDate?'<br><span style="font-size:11px;color:#aaa">'+s.paidDate+'</span>':'')
+      :'<span class="badge badge-no">미입금</span>';
+    return '<tr>'
+      +'<td>'+s.name+'<br><span style="font-size:11px;color:#aaa">'+s.savedBy+'</span><br>'
+      +'<span class="branch-tag '+(s.branch==='seonun'?'branch-seonun':'branch-sinchang')+'">'+(s.branch==='seonun'?'선운점':'신창점')+'</span></td>'
+      +'<td>'+(s.school||'-')+'</td>'
+      +'<td>'+(s.join||'-')+'</td>'
+      +'<td>'+((s.fees||[]).map(function(f){return f.subj+' '+f.amount;}).join('<br>')||'-')+'</td>'
+      +'<td>'+payBadge+'</td>'
+      +'<td><button class="btn-ghost" style="font-size:12px;padding:4px 10px;margin-bottom:4px" onclick="togglePaid('+s.id+')">'+(ok?'미입금으로':'입금 처리')+'</button><br>'
+      +'<button class="btn-ghost" style="font-size:12px;padding:4px 10px;margin-bottom:4px" onclick="loadStudent('+s.id+')">불러오기</button><br>'
+      +'<button class="btn-del" onclick="delStudent('+s.id+')">×</button></td>'
+      +'</tr>';
+  }).join('');
+  el.innerHTML='<table class="student-table"><thead><tr>'
+    +'<th>학생명</th><th onclick="setSort(\'school\',this)">학교·학년</th>'
+    +'<th>입회일</th><th>회비</th><th>입금 상태</th><th>관리</th>'
+    +'</tr></thead><tbody>'+rows+'</tbody></table>';
+}
+function togglePaid(id){
+  var s=students.find(function(x){return x.id===id;}); if(!s) return;
+  s.paid=s.paid==='ok'?'no':'ok';
+  s.paidDate=s.paid==='ok'?new Date().toISOString().slice(0,10):'';
+  save(); renderList();
+}
+function delStudent(id){
+  var s=students.find(function(x){return x.id===id;}); if(!s) return;
+  if(!confirm('"'+s.name+'" 학생을 삭제할까요?')) return;
+  students=students.filter(function(x){return x.id!==id;}); save(); renderList();
+}
+function loadStudent(id){
+  var s=students.find(function(x){return x.id===id;}); if(!s) return;
+  document.getElementById('sName').value=s.name||'';
+  document.getElementById('sSchool').value=s.school||'';
+  document.getElementById('sJoin').value=s.join||'';
+  document.getElementById('sStart').value=s.start||'';
+  document.getElementById('sPaid').value=s.paid||'no';
+  document.getElementById('sPaidDate').value=s.paidDate||'';
+  document.getElementById('hpId').value=s.hpId||'';
+  document.getElementById('hpPw').value=s.hpPw||'';
+  document.getElementById('ttStudentName').value=s.ttName||'';
+  document.getElementById('sGoal').value=s.goal||'';
+  document.getElementById('sCounsel').value=s.counsel||'';
+  document.getElementById('sAccount').value=s.account||'';
+
+  document.getElementById('examBlocks').innerHTML=''; examCount=0;
+  (s.exams||[]).forEach(function(e){
+    examCount++;
+    var id='exam-'+examCount;
+    var div=document.createElement('div'); div.className='exam-block'; div.id=id;
+    var cols='';
+    SUBJ_KEYS.forEach(function(k,i){
+      cols+='<div class="score-col"><div class="score-col-label '+SUBJ_LBLS[i]+'">'+SUBJ_NAMES[i]+'</div>'
+        +'<input type="text" value="'+(e.scores&&e.scores[k]||'')+'" placeholder="—" data-subj="'+k+'" oninput="calcTotal(\''+id+'\')"></div>';
+    });
+    cols+='<div class="score-col"><div class="score-col-label lbl-total">합계</div><div class="total-val" id="tot-'+id+'">—</div></div>';
+    div.innerHTML='<div class="exam-name-row"><input type="text" value="'+(e.examName||'')+'" placeholder="시험명">'
+      +'<button class="btn-del" onclick="document.getElementById(\''+id+'\').remove()">×</button></div>'
+      +'<div class="exam-score-grid">'+cols+'</div>';
+    document.getElementById('examBlocks').appendChild(div);
+    calcTotal(id);
+  });
+
+  document.getElementById('timeRows').innerHTML=''; timeRowCount=0;
+  (s.timetable||[]).forEach(function(r){
+    timeRowCount++;
+    var tid='tr-'+timeRowCount;
+    var tr=document.createElement('tr'); tr.id=tid;
+    var tds='';
+    r.times.forEach(function(t){tds+='<td><input class="tt-cell-input" value="'+(t||'')+'"></td>';});
+    tr.innerHTML='<td><input type="color" value="'+(r.color||'#C85A2A')+'" class="color-pick"></td>'+tds
+      +'<td><button class="btn-del" onclick="document.getElementById(\''+tid+'\').remove()">×</button></td>';
+    document.getElementById('timeRows').appendChild(tr);
+  });
+
+  document.getElementById('feeRows').innerHTML='';
+  (s.fees||[]).forEach(function(f){
+    var div=document.createElement('div');
+    div.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr 28px;gap:8px;margin-bottom:8px;align-items:center';
+    div.innerHTML='<input type="text" style="font-size:13px;padding:7px 10px;background:#faf8f6;border:1.5px solid #e8ddd8;border-radius:8px;font-family:inherit" value="'+(f.subj||'')+'">'
+      +'<input type="text" style="font-size:13px;padding:7px 10px;background:#faf8f6;border:1.5px solid #e8ddd8;border-radius:8px;font-family:inherit" value="'+(f.day||'')+'">'
+      +'<input type="text" style="font-size:13px;padding:7px 10px;background:#faf8f6;border:1.5px solid #e8ddd8;border-radius:8px;font-family:inherit" value="'+(f.amount||'')+'">'
+      +'<button class="btn-del" onclick="this.parentElement.remove()">×</button>';
+    document.getElementById('feeRows').appendChild(div);
+  });
+
+  document.getElementById('teacherRows').innerHTML='';
+  (s.teachers||[]).forEach(function(t){
+    var div=document.createElement('div');
+    div.style.cssText='display:grid;grid-template-columns:1fr 1fr 28px;gap:8px;margin-bottom:8px;align-items:center';
+    div.innerHTML='<input type="text" style="font-size:13px;padding:7px 10px;background:#faf8f6;border:1.5px solid #e8ddd8;border-radius:8px;font-family:inherit" value="'+(t.subj||'')+'">'
+      +'<input type="text" style="font-size:13px;padding:7px 10px;background:#faf8f6;border:1.5px solid #e8ddd8;border-radius:8px;font-family:inherit" value="'+(t.name||'')+'">'
+      +'<button class="btn-del" onclick="this.parentElement.remove()">×</button>';
+    document.getElementById('teacherRows').appendChild(div);
+  });
+
+  if(payEnabled !== !!(s.payEnabled)) togglePay();
+  if(s.payMethod){
+    payMethod=s.payMethod;
+    document.querySelectorAll('.pay-method').forEach(function(e){e.classList.toggle('selected',e.textContent===s.payMethod);});
+  }
+  if(document.getElementById('payMemo')) document.getElementById('payMemo').value=s.payMemo||'';
+  showTab('register');
+  alert('"'+s.name+'" 학생 정보를 불러왔습니다.');
+}
+
+// ── 초기 실행 ──
+initUserBtns();
+setBranch(currentBranch);
+addExamBlock();
+addTimeRow(); addTimeRow();
+addFeeRow();
+addTeacherRow();
+document.getElementById('sJoin').valueAsDate=new Date();
+document.getElementById('sStart').valueAsDate=new Date();
+</script>
+</body>
+</html>
