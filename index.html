@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -172,6 +173,7 @@ body{font-family:'Malgun Gothic','Noto Sans KR',sans-serif;background:#f7f3f0;co
   <div class="tab" onclick="showTab('kakao')">카카오톡 안내문</div>
   <div class="tab" onclick="showTab('list')">학생 목록</div>
   <div class="tab" onclick="showTab('schedule')">🗓 학원 시간표</div>
+  <div class="tab" onclick="showTab('inactive')">😴 휴회 학생</div>
 </div>
 
 <div class="wrap">
@@ -325,7 +327,57 @@ body{font-family:'Malgun Gothic','Noto Sans KR',sans-serif;background:#f7f3f0;co
     </div>
   </div>
 
-  <!-- ⑤ 학원 시간표 -->
+  <!-- ⑥ 휴회 학생 -->
+  <div class="section" id="tab-inactive">
+    <div class="card">
+      <div class="card-title">😴 휴회 학생 목록</div>
+      <div class="filter-bar">
+        <span class="filter-label">정렬:</span>
+        <button class="filter-btn active" onclick="setInactiveSort('name',this)">이름순</button>
+        <button class="filter-btn" onclick="setInactiveSort('date',this)">휴회일순</button>
+        <button class="filter-btn" onclick="setInactiveSort('school',this)">학교순</button>
+      </div>
+      <div id="inactiveList"><div class="empty">휴회 학생이 없습니다.</div></div>
+    </div>
+  </div>
+
+  <!-- 휴회 처리 모달 -->
+  <div id="inactiveModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:16px;padding:24px;width:380px;max-width:95vw">
+      <div style="font-size:16px;font-weight:600;color:#C85A2A;margin-bottom:16px">😴 휴회 처리</div>
+      <div id="inactiveStudentName" style="font-size:15px;font-weight:600;color:#333;margin-bottom:14px"></div>
+      <div class="field" style="margin-bottom:12px">
+        <label>휴회 시작일</label>
+        <input type="date" id="inactiveDate" style="font-size:14px;padding:8px 10px;border:1.5px solid #e8ddd8;border-radius:8px;background:#faf8f6;font-family:inherit;width:100%">
+      </div>
+      <div class="field" style="margin-bottom:12px">
+        <label>휴회 사유</label>
+        <select id="inactiveReason" style="font-size:14px;padding:8px 10px;border:1.5px solid #e8ddd8;border-radius:8px;background:#faf8f6;font-family:inherit;width:100%" onchange="toggleCustomReason(this)">
+          <option value="">-- 사유 선택 --</option>
+          <option value="학업 부담">학업 부담</option>
+          <option value="이사">이사</option>
+          <option value="전학">전학</option>
+          <option value="개인 사정">개인 사정</option>
+          <option value="경제적 사정">경제적 사정</option>
+          <option value="건강 문제">건강 문제</option>
+          <option value="학원 변경">학원 변경</option>
+          <option value="직접 입력">직접 입력</option>
+        </select>
+      </div>
+      <div class="field" id="customReasonField" style="margin-bottom:12px;display:none">
+        <label>직접 입력</label>
+        <input type="text" id="customReason" placeholder="휴회 사유를 입력하세요" style="font-size:14px;padding:8px 10px;border:1.5px solid #e8ddd8;border-radius:8px;background:#faf8f6;font-family:inherit;width:100%">
+      </div>
+      <div class="field" style="margin-bottom:16px">
+        <label>메모</label>
+        <textarea id="inactiveMemo" placeholder="추가 메모 (선택사항)" style="font-size:14px;padding:8px 10px;border:1.5px solid #e8ddd8;border-radius:8px;background:#faf8f6;font-family:inherit;width:100%;height:70px;resize:vertical"></textarea>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn-secondary" onclick="closeInactiveModal()" style="font-size:13px;padding:8px 16px">취소</button>
+        <button class="btn-primary" onclick="confirmInactive()" style="font-size:13px;padding:8px 20px;background:#888;border-color:#888">휴회 처리</button>
+      </div>
+    </div>
+  </div>
   <div class="section" id="tab-schedule">
 
     <!-- 툴바 -->
@@ -771,7 +823,8 @@ function setSort(val,el){
 }
 function renderList(){
   var el=document.getElementById('studentList');
-  var list=students.filter(function(s){
+  var list = students.filter(function(s){
+    if(s.status==='inactive') return false;
     if(s.branch && s.branch!==currentBranch) return false;
     if(listFilter==='all') return true;
     return (s.paid||'no')===listFilter;
@@ -892,7 +945,105 @@ function loadStudent(id){
   alert('"'+s.name+'" 학생 정보를 불러왔습니다.');
 }
 
-// ── 학원 시간표 ──
+// ── 휴회 ──
+var inactiveSort = 'name';
+var pendingInactiveId = null;
+
+function setInactiveSort(val, el){
+  inactiveSort = val;
+  document.querySelectorAll('#tab-inactive .filter-btn').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active');
+  renderInactive();
+}
+
+function handleInactiveCheck(el, id){
+  if(el.checked){
+    openInactiveModal(id);
+    el.checked=false; // 모달에서 확정 후 목록에서 사라짐
+  }
+}
+
+function openInactiveModal(id){
+  var s = students.find(function(x){return x.id===id;});
+  if(!s) return;
+  pendingInactiveId = id;
+  document.getElementById('inactiveStudentName').textContent = '학생: ' + s.name + ' (' + (s.school||'') + ')';
+  document.getElementById('inactiveDate').valueAsDate = new Date();
+  document.getElementById('inactiveReason').value = '';
+  document.getElementById('customReason').value = '';
+  document.getElementById('customReasonField').style.display = 'none';
+  document.getElementById('inactiveMemo').value = '';
+  document.getElementById('inactiveModal').style.display = 'flex';
+}
+
+function closeInactiveModal(){
+  document.getElementById('inactiveModal').style.display = 'none';
+  pendingInactiveId = null;
+}
+
+function toggleCustomReason(sel){
+  document.getElementById('customReasonField').style.display = sel.value==='직접 입력' ? 'block' : 'none';
+}
+
+function confirmInactive(){
+  if(!pendingInactiveId) return;
+  var reason = document.getElementById('inactiveReason').value;
+  if(reason === '직접 입력') reason = document.getElementById('customReason').value.trim();
+  if(!reason){alert('휴회 사유를 선택하거나 입력해 주세요.');return;}
+  var date = document.getElementById('inactiveDate').value;
+  var memo = document.getElementById('inactiveMemo').value;
+  var idx = students.findIndex(function(x){return x.id===pendingInactiveId;});
+  if(idx<0) return;
+  students[idx].status = 'inactive';
+  students[idx].inactiveDate = date;
+  students[idx].inactiveReason = reason;
+  students[idx].inactiveMemo = memo;
+  save();
+  closeInactiveModal();
+  renderList();
+}
+
+function reactivate(id){
+  if(!confirm('이 학생을 다시 재등록 처리할까요?')) return;
+  var idx = students.findIndex(function(x){return x.id===id;});
+  if(idx<0) return;
+  students[idx].status = 'active';
+  students[idx].inactiveDate = '';
+  students[idx].inactiveReason = '';
+  students[idx].inactiveMemo = '';
+  save();
+  renderInactive();
+}
+
+function renderInactive(){
+  var el = document.getElementById('inactiveList');
+  var list = students.filter(function(s){
+    return s.status==='inactive' && (!s.branch || s.branch===currentBranch);
+  });
+  if(!list.length){el.innerHTML='<div class="empty">휴회 학생이 없습니다.</div>';return;}
+  list = list.slice().sort(function(a,b){
+    if(inactiveSort==='name') return (a.name||'').localeCompare(b.name||'','ko');
+    if(inactiveSort==='date') return (b.inactiveDate||'').localeCompare(a.inactiveDate||'');
+    if(inactiveSort==='school') return (a.school||'').localeCompare(b.school||'','ko');
+    return 0;
+  });
+  var rows = list.map(function(s){
+    return '<tr>'
+      +'<td><strong>'+s.name+'</strong><br><span style="font-size:11px;color:#aaa">'+(s.school||'-')+'</span></td>'
+      +'<td>'+(s.inactiveDate||'-')+'</td>'
+      +'<td><span style="background:#f5e8e8;color:#a32d2d;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600">'+(s.inactiveReason||'')+'</span></td>'
+      +'<td style="font-size:12px;color:#888">'+(s.inactiveMemo||'-')+'</td>'
+      +'<td style="font-size:12px">'+((s.fees||[]).map(function(f){return f.subj+' '+f.amount;}).join('<br>')||'-')+'</td>'
+      +'<td>'
+      +'<button class="btn-ghost" style="font-size:12px;padding:4px 10px;margin-bottom:4px;color:#2DAA72;border-color:#2DAA72" onclick="reactivate('+s.id+')">재등록</button><br>'
+      +'<button class="btn-del" onclick="delStudent('+s.id+')">×</button>'
+      +'</td>'
+      +'</tr>';
+  }).join('');
+  el.innerHTML = '<table class="student-table">'
+    +'<thead><tr><th>학생명</th><th>휴회일</th><th>휴회 사유</th><th>메모</th><th>회비</th><th>관리</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table>';
+}
 var schedule = JSON.parse(localStorage.getItem('wawaSchedule')||'{}');
 // schedule[branch][day][slot] = [{id, className, time, teacher, color, studentIds, extraStudents}]
 
