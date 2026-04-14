@@ -171,6 +171,7 @@ body{font-family:'Malgun Gothic','Noto Sans KR',sans-serif;background:#f7f3f0;co
   <div class="tab" onclick="showTab('timetable')">시간표 미리보기</div>
   <div class="tab" onclick="showTab('kakao')">카카오톡 안내문</div>
   <div class="tab" onclick="showTab('list')">학생 목록</div>
+  <div class="tab" onclick="showTab('schedule')">🗓 학원 시간표</div>
 </div>
 
 <div class="wrap">
@@ -324,7 +325,73 @@ body{font-family:'Malgun Gothic','Noto Sans KR',sans-serif;background:#f7f3f0;co
     </div>
   </div>
 
-  <!-- ④ 학생 목록 -->
+  <!-- ⑤ 학원 시간표 -->
+  <div class="section" id="tab-schedule">
+
+    <!-- 툴바 -->
+    <div style="background:#fff;border-radius:14px;padding:16px 20px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="font-size:15px;font-weight:600;color:#C85A2A;margin-right:8px">🗓 학원 시간표</div>
+      <button class="btn-add" onclick="openSlotModal()">+ 수업 추가</button>
+      <button class="btn-ghost" onclick="clearSchedule()" style="margin-left:auto">전체 초기화</button>
+      <button class="btn-print" onclick="printSchedule()">🖨 인쇄</button>
+    </div>
+
+    <!-- 시간표 본체 -->
+    <div style="overflow-x:auto;background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+      <table id="scheduleTable" style="border-collapse:separate;border-spacing:3px;min-width:900px;width:100%;table-layout:fixed">
+        <thead id="scheduleThead"></thead>
+        <tbody id="scheduleTbody"></tbody>
+      </table>
+    </div>
+
+    <!-- 범례 -->
+    <div style="background:#fff;border-radius:14px;padding:14px 20px;margin-top:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+      <div style="font-size:13px;font-weight:600;color:#888;margin-bottom:8px">과목 색상</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap" id="subjectLegend"></div>
+    </div>
+
+    <!-- 수업 추가 모달 -->
+    <div id="slotModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center">
+      <div style="background:#fff;border-radius:16px;padding:24px;width:380px;max-width:95vw;max-height:90vh;overflow-y:auto">
+        <div style="font-size:16px;font-weight:600;color:#C85A2A;margin-bottom:16px">수업 추가 / 수정</div>
+        <div class="field" style="margin-bottom:10px"><label>요일</label>
+          <select id="mDay" style="font-size:14px;padding:8px 10px;border:1.5px solid #e8ddd8;border-radius:8px;background:#faf8f6;font-family:inherit">
+            <option value="0">월</option><option value="1">화</option><option value="2">수</option>
+            <option value="3">목</option><option value="4">금</option><option value="5">토</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:10px"><label>시간대</label>
+          <select id="mSlot" style="font-size:14px;padding:8px 10px;border:1.5px solid #e8ddd8;border-radius:8px;background:#faf8f6;font-family:inherit">
+            <option value="0">초등 (14:00~15:10)</option>
+            <option value="1">1구시 (15:30~16:40)</option>
+            <option value="2">2구시 (16:40~18:00)</option>
+            <option value="3">3구시 (18:00~22:00)</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:10px"><label>수업명</label>
+          <input type="text" id="mClass" placeholder="예) 국어, 수학, 영어" style="font-size:14px;padding:8px 10px;border:1.5px solid #e8ddd8;border-radius:8px;background:#faf8f6;font-family:inherit;width:100%">
+        </div>
+        <div class="field" style="margin-bottom:10px"><label>수업 시간</label>
+          <input type="text" id="mTime" placeholder="예) 16:00~17:10" style="font-size:14px;padding:8px 10px;border:1.5px solid #e8ddd8;border-radius:8px;background:#faf8f6;font-family:inherit;width:100%">
+        </div>
+        <div class="field" style="margin-bottom:10px"><label>강사명</label>
+          <input type="text" id="mTeacher" placeholder="예) 이하림 강사" style="font-size:14px;padding:8px 10px;border:1.5px solid #e8ddd8;border-radius:8px;background:#faf8f6;font-family:inherit;width:100%">
+        </div>
+        <div class="field" style="margin-bottom:10px"><label>색상</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px" id="colorPicker"></div>
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>학생 선택 <span style="font-weight:400;color:#bbb">(등록된 학생 + 직접 입력)</span></label>
+          <div id="studentCheckList" style="max-height:160px;overflow-y:auto;border:1.5px solid #e8ddd8;border-radius:8px;padding:8px;background:#faf8f6;margin-bottom:6px"></div>
+          <input type="text" id="mExtraStudents" placeholder="추가 학생 이름 (쉼표로 구분)" style="font-size:13px;padding:8px 10px;border:1.5px solid #e8ddd8;border-radius:8px;background:#faf8f6;font-family:inherit;width:100%">
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn-secondary" onclick="closeModal()" style="font-size:13px;padding:8px 16px">취소</button>
+          <button class="btn-primary" onclick="saveSlot()" style="font-size:13px;padding:8px 20px">저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="section" id="tab-list">
     <div class="card">
       <div class="card-title">등록 학생 목록</div>
@@ -396,7 +463,7 @@ function setBranch(b){
 // ── 탭 ──
 function showTab(t){
   document.querySelectorAll('.tab').forEach(function(b,i){
-    b.classList.toggle('active', ['register','timetable','kakao','list'][i]===t);
+    b.classList.toggle('active', ['register','timetable','kakao','list','schedule'][i]===t);
   });
   document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
   document.getElementById('tab-'+t).classList.add('active');
@@ -825,7 +892,193 @@ function loadStudent(id){
   alert('"'+s.name+'" 학생 정보를 불러왔습니다.');
 }
 
-// ── 초기 실행 ──
+// ── 학원 시간표 ──
+var schedule = JSON.parse(localStorage.getItem('wawaSchedule')||'{}');
+// schedule[branch][day][slot] = [{id, className, time, teacher, color, studentIds, extraStudents}]
+
+var DAYS = ['월','화','수','목','금','토'];
+var SLOTS = [
+  {label:'초등', time:'14:00~15:10', bg:'#FEF3E2'},
+  {label:'1구시', time:'15:30~16:40', bg:'#EAF3DE'},
+  {label:'2구시', time:'16:40~18:00', bg:'#E6F1FB'},
+  {label:'3구시', time:'18:00~22:00', bg:'#F0E8FA'},
+];
+var CLASS_COLORS = [
+  '#C85A2A','#4A90D9','#2DAA72','#9B59B6','#E67E22',
+  '#E84393','#16A085','#E24B4A','#2C3E50','#7F8C8D'
+];
+var editingKey = null; // 'branch-day-slot-idx' or null
+
+function saveSchedule(){ localStorage.setItem('wawaSchedule', JSON.stringify(schedule)); }
+
+function getBranchSchedule(){
+  if(!schedule[currentBranch]) schedule[currentBranch]={};
+  return schedule[currentBranch];
+}
+
+function renderSchedule(){
+  var thead = document.getElementById('scheduleThead');
+  var tbody = document.getElementById('scheduleTbody');
+
+  // 헤더
+  var hrow = '<tr><th style="width:80px;background:#f5ede8;border-radius:8px;padding:8px 4px;font-size:12px;color:#C85A2A;font-weight:700">시간대</th>';
+  DAYS.forEach(function(d,i){
+    hrow += '<th style="background:'+DAY_COLORS[i]+';border-radius:8px;padding:8px 4px;font-size:13px;font-weight:700;color:#fff;text-align:center">'+d+'</th>';
+  });
+  hrow += '</tr>';
+  thead.innerHTML = hrow;
+
+  // 바디
+  var bsched = getBranchSchedule();
+  var rows = '';
+  SLOTS.forEach(function(slot, si){
+    rows += '<tr>';
+    // 시간대 레이블
+    rows += '<td style="background:'+slot.bg+';border-radius:8px;padding:8px 6px;vertical-align:top;min-width:75px">'
+      +'<div style="font-size:12px;font-weight:700;color:#444">'+slot.label+'</div>'
+      +'<div style="font-size:10px;color:#999">'+slot.time+'</div></td>';
+    DAYS.forEach(function(d, di){
+      var key = di+'-'+si;
+      var classes = (bsched[key]||[]);
+      var cellContent = '';
+      classes.forEach(function(cls, idx){
+        var stuList = [];
+        (cls.studentIds||[]).forEach(function(sid){
+          var s = students.find(function(x){return x.id===sid;});
+          if(s) stuList.push(s.name);
+        });
+        (cls.extraStudents||'').split(',').forEach(function(n){if(n.trim()) stuList.push(n.trim());});
+
+        cellContent += '<div style="background:'+cls.color+';border-radius:8px;padding:6px 8px;margin-bottom:4px;cursor:pointer;position:relative" onclick="editSlot(\''+di+'\',\''+si+'\','+idx+')">'
+          +'<div style="font-size:11px;font-weight:700;color:#fff;margin-bottom:2px">'+cls.className+'</div>'
+          +(cls.time?'<div style="font-size:10px;color:rgba(255,255,255,.85)">⏰ '+cls.time+'</div>':'')
+          +(cls.teacher?'<div style="font-size:10px;color:rgba(255,255,255,.85)">👤 '+cls.teacher+'</div>':'')
+          +(stuList.length?'<div style="font-size:10px;color:rgba(255,255,255,.9);margin-top:3px;line-height:1.5">'+stuList.join('<br>')+'</div>':'')
+          +'<button onclick="event.stopPropagation();deleteSlot(\''+di+'\',\''+si+'\','+idx+')" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,.2);border:none;border-radius:50%;width:16px;height:16px;color:#fff;font-size:11px;cursor:pointer;line-height:1;padding:0">×</button>'
+          +'</div>';
+      });
+      cellContent += '<button onclick="openSlotModal(\''+di+'\',\''+si+'\')" style="width:100%;background:rgba(0,0,0,.04);border:1.5px dashed #ddd;border-radius:8px;padding:5px;font-size:11px;color:#bbb;cursor:pointer;margin-top:2px">+ 추가</button>';
+      rows += '<td style="vertical-align:top;padding:4px;min-width:110px">'+cellContent+'</td>';
+    });
+    rows += '</tr>';
+  });
+  tbody.innerHTML = rows;
+
+  // 범례
+  var legend = document.getElementById('subjectLegend');
+  var seen = {};
+  Object.values(getBranchSchedule()).forEach(function(arr){
+    arr.forEach(function(cls){
+      if(!seen[cls.className]){
+        seen[cls.className]=cls.color;
+      }
+    });
+  });
+  legend.innerHTML = Object.keys(seen).map(function(k){
+    return '<div style="display:flex;align-items:center;gap:5px;font-size:12px"><div style="width:12px;height:12px;border-radius:3px;background:'+seen[k]+'"></div>'+k+'</div>';
+  }).join('');
+}
+
+var modalDay=0, modalSlot=0, modalEditIdx=-1;
+
+function openSlotModal(day, slot){
+  modalDay = parseInt(day)||0;
+  modalSlot = parseInt(slot)||0;
+  modalEditIdx = -1;
+  editingKey = null;
+  document.getElementById('mDay').value = modalDay;
+  document.getElementById('mSlot').value = modalSlot;
+  document.getElementById('mClass').value='';
+  document.getElementById('mTime').value='';
+  document.getElementById('mTeacher').value='';
+  document.getElementById('mExtraStudents').value='';
+  buildColorPicker('#C85A2A');
+  buildStudentChecks([]);
+  document.getElementById('slotModal').style.display='flex';
+}
+
+function editSlot(day, slot, idx){
+  modalDay=parseInt(day); modalSlot=parseInt(slot); modalEditIdx=parseInt(idx);
+  var key=day+'-'+slot;
+  var cls=(getBranchSchedule()[key]||[])[idx];
+  if(!cls) return;
+  document.getElementById('mDay').value=modalDay;
+  document.getElementById('mSlot').value=modalSlot;
+  document.getElementById('mClass').value=cls.className||'';
+  document.getElementById('mTime').value=cls.time||'';
+  document.getElementById('mTeacher').value=cls.teacher||'';
+  document.getElementById('mExtraStudents').value=cls.extraStudents||'';
+  buildColorPicker(cls.color||'#C85A2A');
+  buildStudentChecks(cls.studentIds||[]);
+  document.getElementById('slotModal').style.display='flex';
+}
+
+function buildColorPicker(selected){
+  var el=document.getElementById('colorPicker');
+  el.innerHTML=CLASS_COLORS.map(function(c){
+    return '<div onclick="selectScColor(this,\''+c+'\')" style="width:28px;height:28px;border-radius:7px;background:'+c+';cursor:pointer;border:3px solid '+(c===selected?'#222':'transparent')+'"></div>';
+  }).join('');
+}
+function selectScColor(el,c){
+  document.querySelectorAll('#colorPicker div').forEach(function(d){d.style.border='3px solid transparent';});
+  el.style.border='3px solid #222';
+}
+
+function buildStudentChecks(checkedIds){
+  var el=document.getElementById('studentCheckList');
+  var branch=students.filter(function(s){return !s.branch||s.branch===currentBranch;});
+  if(!branch.length){el.innerHTML='<div style="font-size:12px;color:#bbb;padding:4px">등록된 학생 없음</div>';return;}
+  el.innerHTML=branch.map(function(s){
+    var chk=checkedIds.indexOf(s.id)>=0;
+    return '<label style="display:flex;align-items:center;gap:7px;padding:5px 4px;font-size:13px;cursor:pointer;border-radius:6px">'
+      +'<input type="checkbox" value="'+s.id+'" '+(chk?'checked':'')+' style="width:15px;height:15px">'+s.name
+      +'<span style="font-size:11px;color:#bbb">'+s.school+'</span></label>';
+  }).join('');
+}
+
+function closeModal(){ document.getElementById('slotModal').style.display='none'; }
+
+function saveSlot(){
+  var day=document.getElementById('mDay').value;
+  var slot=document.getElementById('mSlot').value;
+  var className=document.getElementById('mClass').value.trim();
+  if(!className){alert('수업명을 입력해 주세요.');return;}
+  var time=document.getElementById('mTime').value.trim();
+  var teacher=document.getElementById('mTeacher').value.trim();
+  var extra=document.getElementById('mExtraStudents').value.trim();
+  var colorEl=document.querySelector('#colorPicker div[style*="border: 3px solid rgb(34"]')||document.querySelector('#colorPicker div');
+  var color=colorEl?colorEl.style.background:'#C85A2A';
+  var studentIds=[];
+  document.querySelectorAll('#studentCheckList input[type=checkbox]:checked').forEach(function(cb){studentIds.push(parseInt(cb.value));});
+
+  var key=day+'-'+slot;
+  var bsched=getBranchSchedule();
+  if(!bsched[key]) bsched[key]=[];
+  var entry={className:className,time:time,teacher:teacher,color:color,studentIds:studentIds,extraStudents:extra};
+  if(modalEditIdx>=0) bsched[key][modalEditIdx]=entry;
+  else bsched[key].push(entry);
+  saveSchedule();
+  closeModal();
+  renderSchedule();
+}
+
+function deleteSlot(day,slot,idx){
+  if(!confirm('이 수업을 삭제할까요?')) return;
+  var key=day+'-'+slot;
+  var bsched=getBranchSchedule();
+  if(bsched[key]) bsched[key].splice(idx,1);
+  saveSchedule(); renderSchedule();
+}
+
+function clearSchedule(){
+  if(!confirm('이 지점의 시간표를 모두 초기화할까요?')) return;
+  schedule[currentBranch]={};
+  saveSchedule(); renderSchedule();
+}
+
+function printSchedule(){
+  window.print();
+}
 initUserBtns();
 setBranch(currentBranch);
 addExamBlock();
