@@ -400,11 +400,11 @@ body{font-family:'Malgun Gothic','Noto Sans KR',sans-serif;background:#f7f3f0;co
         </div>
         <div class="field" style="margin-bottom:10px"><label>시간대</label>
           <select id="mSlot" style="font-size:14px;padding:8px 10px;border:1.5px solid #e8ddd8;border-radius:8px;background:#faf8f6;font-family:inherit">
-            <option value="0">1구시 (14:00~15:10 / 화 15:00~16:10)</option>
-            <option value="1">1.5구시 (16:00~17:40)</option>
-            <option value="2">2구시 (16:40~18:20)</option>
-            <option value="3">3구시 (18:40~20:20)</option>
-            <option value="4">4구시 (20:20~22:00)</option>
+            <option value="0">1교시 (14:00~15:10 / 화 15:00~16:10)</option>
+            <option value="1">1.5교시 (16:00~17:40)</option>
+            <option value="2">2교시 (16:40~18:20)</option>
+            <option value="3">3교시 (18:40~20:20)</option>
+            <option value="4">4교시 (20:20~22:00)</option>
           </select>
         </div>
         <div class="field" style="margin-bottom:10px"><label>수업명</label>
@@ -420,9 +420,11 @@ body{font-family:'Malgun Gothic','Noto Sans KR',sans-serif;background:#f7f3f0;co
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px" id="colorPicker"></div>
         </div>
         <div class="field" style="margin-bottom:12px">
-          <label>학생 선택 <span style="font-weight:400;color:#bbb">(등록된 학생 + 직접 입력)</span></label>
+          <label>학생 선택 <span style="font-weight:400;color:#bbb">(등록된 학생)</span></label>
           <div id="studentCheckList" style="max-height:160px;overflow-y:auto;border:1.5px solid #e8ddd8;border-radius:8px;padding:8px;background:#faf8f6;margin-bottom:6px"></div>
-          <input type="text" id="mExtraStudents" placeholder="추가 학생 이름 (쉼표로 구분)" style="font-size:13px;padding:8px 10px;border:1.5px solid #e8ddd8;border-radius:8px;background:#faf8f6;font-family:inherit;width:100%">
+          <label style="font-size:12px;font-weight:600;color:#888;margin-top:6px;display:block">직접 이름 추가 <span style="font-weight:400;color:#bbb">(미등록 학생)</span></label>
+          <div id="extraStudentInputs" style="margin-top:6px"></div>
+          <button type="button" onclick="addExtraStudentInput()" style="font-size:12px;padding:5px 12px;border:1.5px solid #C85A2A;color:#C85A2A;border-radius:7px;background:#fff;cursor:pointer;margin-top:6px">+ 이름 직접 추가</button>
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end">
           <button class="btn-secondary" onclick="closeModal()" style="font-size:13px;padding:8px 16px">취소</button>
@@ -1039,11 +1041,11 @@ var schedule = JSON.parse(localStorage.getItem('wawaSchedule')||'{}');
 
 var DAYS = ['월','화','수','목','금','토'];
 var SLOTS = [
-  {label:'1구시', time:'14:00~15:10 (화 15:00~16:10)', bg:'#FEF3E2'},
-  {label:'1.5구시', time:'16:00~17:40', bg:'#FFE8D6'},
-  {label:'2구시', time:'16:40~18:20', bg:'#EAF3DE'},
-  {label:'3구시', time:'18:40~20:20', bg:'#E6F1FB'},
-  {label:'4구시', time:'20:20~22:00', bg:'#F0E8FA'},
+  {label:'1교시', time:'14:00~15:10 (화 15:00~16:10)', bg:'#FEF3E2'},
+  {label:'1.5교시', time:'16:00~17:40', bg:'#FFE8D6'},
+  {label:'2교시', time:'16:40~18:20', bg:'#EAF3DE'},
+  {label:'3교시', time:'18:40~20:20', bg:'#E6F1FB'},
+  {label:'4교시', time:'20:20~22:00', bg:'#F0E8FA'},
 ];
 var CLASS_COLORS = [
   '#C85A2A','#4A90D9','#2DAA72','#9B59B6','#E67E22',
@@ -1134,8 +1136,9 @@ function openSlotModal(day, slot){
   document.getElementById('mTime').value='';
   document.getElementById('mTeacher').value='';
   document.getElementById('mExtraStudents').value='';
+  document.getElementById('extraStudentInputs').innerHTML='';
   buildColorPicker('#C85A2A');
-  buildStudentChecks([]);
+  buildStudentChecks([], []);
   document.getElementById('slotModal').style.display='flex';
 }
 
@@ -1150,8 +1153,9 @@ function editSlot(day, slot, idx){
   document.getElementById('mTime').value=cls.time||'';
   document.getElementById('mTeacher').value=cls.teacher||'';
   document.getElementById('mExtraStudents').value=cls.extraStudents||'';
+  document.getElementById('extraStudentInputs').innerHTML='';
   buildColorPicker(cls.color||'#C85A2A');
-  buildStudentChecks(cls.studentIds||[]);
+  buildStudentChecks(cls.studentIds||[], (cls.extraStudents||'').split(',').map(function(s){return s.trim();}).filter(Boolean));
   document.getElementById('slotModal').style.display='flex';
 }
 
@@ -1166,7 +1170,18 @@ function selectScColor(el,c){
   el.style.border='3px solid #222';
 }
 
-function buildStudentChecks(checkedIds){
+function addExtraStudentInput(val){
+  var wrap=document.getElementById('extraStudentInputs');
+  var row=document.createElement('div');
+  row.style.cssText='display:flex;gap:6px;align-items:center;margin-bottom:6px';
+  row.innerHTML='<input type="text" value="'+(val||'')+'" placeholder="학생 이름 입력" style="flex:1;font-size:13px;padding:7px 10px;border:1.5px solid #e8ddd8;border-radius:8px;background:#fff;font-family:inherit">'
+    +'<button onclick="this.parentElement.remove()" style="background:none;border:none;color:#e08080;cursor:pointer;font-size:18px;padding:0">×</button>';
+  wrap.appendChild(row);
+}
+
+function getExtraStudentNames(){
+  return Array.from(document.querySelectorAll('#extraStudentInputs input')).map(function(i){return i.value.trim();}).filter(Boolean);
+}
   var el=document.getElementById('studentCheckList');
   var branch=students.filter(function(s){return !s.branch||s.branch===currentBranch;});
   if(!branch.length){el.innerHTML='<div style="font-size:12px;color:#bbb;padding:4px">등록된 학생 없음</div>';return;}
@@ -1196,7 +1211,8 @@ function saveSlot(){
   var key=day+'-'+slot;
   var bsched=getBranchSchedule();
   if(!bsched[key]) bsched[key]=[];
-  var entry={className:className,time:time,teacher:teacher,color:color,studentIds:studentIds,extraStudents:extra};
+  var extraNames=getExtraStudentNames();
+  var entry={className:className,time:time,teacher:teacher,color:color,studentIds:studentIds,extraStudents:extraNames.join(',')};
   if(modalEditIdx>=0) bsched[key][modalEditIdx]=entry;
   else bsched[key].push(entry);
   saveSchedule();
