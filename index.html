@@ -432,6 +432,31 @@ var SAT_SLOTS=[
   {l:'토 2교시',t:'11:30~13:00',bg:'#EAF3DE'},
   {l:'토 3교시',t:'13:00~14:30',bg:'#E6F1FB'},
 ];
+// 신창점 교시
+var SIN_SLOTS=[
+  {l:'1교시',t:'14:00~15:10 (화 15:00~16:10)',bg:'#FEF3E2'},
+  {l:'1.5교시',t:'16:00~17:40',bg:'#FFE8D6'},
+  {l:'2교시',t:'16:40~18:20',bg:'#EAF3DE'},
+  {l:'3교시',t:'18:40~20:20',bg:'#E6F1FB'},
+  {l:'4교시',t:'20:20~22:00',bg:'#F0E8FA'}
+];
+// 선운점 교시 (요일별)
+var SEO_SLOTS_WTF=[ // 월화목금
+  {l:'1교시',t:'14:40~15:50',bg:'#FEF3E2'},
+  {l:'2교시',t:'15:50~17:00',bg:'#FFE8D6'},
+  {l:'3교시',t:'17:00~18:40',bg:'#EAF3DE'},
+  {l:'4교시',t:'19:00~20:40',bg:'#E6F1FB'},
+];
+var SEO_SLOTS_W=[ // 수요일
+  {l:'1교시',t:'14:00~15:10',bg:'#FEF3E2'},
+  {l:'2교시',t:'15:10~16:20',bg:'#FFE8D6'},
+  {l:'3교시',t:'16:20~18:00',bg:'#EAF3DE'},
+  {l:'4교시',t:'18:30~20:10',bg:'#E6F1FB'},
+];
+var SEO_SAT=[ // 선운 토요일
+  {l:'토 1교시',t:'10:00~11:30',bg:'#FEF3E2'},
+  {l:'토 2교시',t:'11:30~13:00',bg:'#EAF3DE'},
+];
 var SK=['ko','en','ma','so','sc','et'];
 var SN=['국어','영어','수학','사회','과학','기타'];
 var SC2=['#4A90D9','#2DAA72','#9B59B6','#E67E22','#E84393','#888'];
@@ -756,38 +781,47 @@ function loadStu(id){
 
 // 학원 시간표
 function getBSC(){if(!SC[CB]) SC[CB]={};return SC[CB];}
+function getSlots(di){
+  // di: 0=월,1=화,2=수,3=목,4=금,5=토
+  if(CB==='seonun'){
+    if(di===5) return SEO_SAT;
+    if(di===2) return SEO_SLOTS_W;
+    return SEO_SLOTS_WTF;
+  } else {
+    if(di===5) return SAT_SLOTS;
+    return SIN_SLOTS;
+  }
+}
+
 function renderSch(){
   var th=v('scTh');var tb=v('scTb');if(!th||!tb) return;
   var hr='<tr><th style="background:#f5ede8;color:#C85A2A;border-radius:6px;width:75px">시간대</th>';
   DAYS.forEach(function(d,i){hr+='<th style="background:'+DC[i]+';border-radius:6px">'+d+'</th>';});
   th.innerHTML=hr+'</tr>';
-  var bs=getBSC();var rows='';
+  var bs=getBSC();
 
-  // 평일 교시 (월~금, di 0~4)
-  SLOTS.forEach(function(sl,si){
-    rows+='<tr><td style="background:'+sl.bg+';border-radius:7px;padding:7px 5px;vertical-align:top"><div style="font-size:11px;font-weight:700;color:#444">'+sl.l+'</div><div style="font-size:9px;color:#999">'+sl.t+'</div></td>';
+  // 최대 교시 수 계산 (가장 많은 교시 기준으로 행 생성)
+  var maxSlot=0;
+  DAYS.forEach(function(d,di){ var sl=getSlots(di); if(sl.length>maxSlot) maxSlot=sl.length; });
+
+  var rows='';
+  for(var si=0;si<maxSlot;si++){
+    rows+='<tr>';
+    // 첫 번째 열: 가장 많이 쓰이는 교시 레이블 (월 기준)
+    var refSl=getSlots(0);
+    var slInfo=refSl[si];
+    if(slInfo){
+      rows+='<td style="background:'+slInfo.bg+';border-radius:7px;padding:7px 5px;vertical-align:top"><div style="font-size:11px;font-weight:700;color:#444">'+slInfo.l+'</div><div style="font-size:9px;color:#999">'+slInfo.t+'</div></td>';
+    } else {
+      rows+='<td></td>';
+    }
     DAYS.forEach(function(d,di){
-      if(di===5){
-        // 토요일: SAT_SLOTS 사용
-        var k='5-sat-'+si;var cls=bs[k]||[];var cell='';
-        if(si<SAT_SLOTS.length){
-          cls.forEach(function(c,idx){
-            var sn=[];
-            (c.stuIds||[]).forEach(function(sid){var s=SS.find(function(x){return x.id===sid;});if(s) sn.push(s.name);});
-            (c.exNm||'').split(',').forEach(function(n){if(n.trim()) sn.push(n.trim());});
-            cell+='<div class="sc-cls" style="background:'+c.color+'" onclick="openScModal(5,\'sat-'+si+'\','+idx+')">'
-              +'<div style="font-size:11px;font-weight:700;color:#fff;margin-bottom:2px">'+c.cn+'</div>'
-              +(c.time?'<div style="font-size:9px;color:rgba(255,255,255,.85)">⏰ '+c.time+'</div>':'')
-              +(c.tch?'<div style="font-size:9px;color:rgba(255,255,255,.85)">👤 '+c.tch+'</div>':'')
-              +(sn.length?'<div style="font-size:9px;color:rgba(255,255,255,.9);margin-top:2px">'+sn.join(', ')+'</div>':'')
-              +'<button onclick="event.stopPropagation();delSlt(5,\'sat-'+si+'\','+idx+')" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.2);border:none;border-radius:50%;width:14px;height:14px;color:#fff;font-size:9px;cursor:pointer;line-height:1;padding:0">×</button>'
-              +'</div>';
-          });
-          cell+='<button class="sc-add" onclick="openScModal(5,\'sat-'+si+'\')">+ 추가</button>';
-        }
-        rows+='<td style="vertical-align:top;padding:3px">'+cell+'</td>';
-      } else {
-        var k=di+'-'+si;var cls=bs[k]||[];var cell='';
+      var slArr=getSlots(di);
+      var sl=slArr[si];
+      var k=di+'-'+si;
+      var cls=bs[k]||[];
+      var cell='';
+      if(sl){
         cls.forEach(function(c,idx){
           var sn=[];
           (c.stuIds||[]).forEach(function(sid){var s=SS.find(function(x){return x.id===sid;});if(s) sn.push(s.name);});
@@ -800,12 +834,14 @@ function renderSch(){
             +'<button onclick="event.stopPropagation();delSlt('+di+','+si+','+idx+')" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.2);border:none;border-radius:50%;width:14px;height:14px;color:#fff;font-size:9px;cursor:pointer;line-height:1;padding:0">×</button>'
             +'</div>';
         });
-        cell+='<button class="sc-add" onclick="openScModal('+di+','+si+')">+ 추가</button>';
-        rows+='<td style="vertical-align:top;padding:3px">'+cell+'</td>';
+        cell+='<button class="sc-add" onclick="openScModal('+di+','+si+')">+ 추가 ('+sl.t+')</button>';
+      } else {
+        cell='<div style="font-size:10px;color:#ddd;text-align:center;padding:8px">—</div>';
       }
+      rows+='<td style="vertical-align:top;padding:3px">'+cell+'</td>';
     });
     rows+='</tr>';
-  });
+  }
 
   tb.innerHTML=rows;
   var leg=v('scLeg');if(!leg) return;var seen={};
