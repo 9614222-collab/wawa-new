@@ -434,10 +434,12 @@ body{font-family:'Malgun Gothic',sans-serif;background:#f7f3f0;font-size:14px;co
   </div>
 </div>
 
-<script>
-var SS=JSON.parse(localStorage.getItem('wS')||'[]');
-var SC=JSON.parse(localStorage.getItem('wSC')||'{}');
-var CD=JSON.parse(localStorage.getItem('wCD')||'{}');
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+var SS=[];
+var SC={};
+var CD={};
 var CU=localStorage.getItem('wU')||'선생님1';
 var CB=localStorage.getItem('wB')||'sinchang';
 var PE=false,PM='';
@@ -1087,6 +1089,7 @@ initLogin();
 initU();setBr(CB);
 addExam();addRTT();addRTT();addFee();addTch();
 v('sJoin').valueAsDate=new Date();v('sStart').valueAsDate=new Date();
+initFirebase();
 </script>
 </body>
 </html>
