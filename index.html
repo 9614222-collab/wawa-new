@@ -312,11 +312,7 @@ body{font-family:'Malgun Gothic',sans-serif;background:#f7f3f0;font-size:14px;co
       <div style="color:#fff;font-size:4px;letter-spacing:.5px">와와학습코칭센터</div>
     </div>
     <div style="font-size:18px;font-weight:600;color:#333;margin-bottom:6px">와와학습코칭센터</div>
-    <div style="font-size:13px;color:#aaa;margin-bottom:24px">사용자를 선택하고 비밀번호를 입력하세요</div>
-    <div style="margin-bottom:14px">
-      <div style="font-size:12px;font-weight:600;color:#888;margin-bottom:8px;text-align:left">사용자 선택</div>
-      <div id="loginUserBtns" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:4px"></div>
-    </div>
+    <div style="font-size:13px;color:#aaa;margin-bottom:24px">비밀번호를 입력하세요</div>
     <div style="margin-bottom:16px">
       <div style="font-size:12px;font-weight:600;color:#888;margin-bottom:6px;text-align:left">비밀번호</div>
       <input type="password" id="loginPw" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')doLogin()"
@@ -550,27 +546,18 @@ var loginUser=USER_NAMES[0];
 
 // ── 로그인 ──
 function initLogin(){
-  var el=document.getElementById('loginUserBtns'); el.innerHTML='';
-  USER_NAMES.forEach(function(u,i){
-    var b=document.createElement('button');
-    b.textContent=u;
-    b.style.cssText='padding:7px 14px;border-radius:20px;border:1.5px solid #e8ddd8;background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:#888';
-    b.onclick=function(){
-      document.querySelectorAll('#loginUserBtns button').forEach(function(x){x.style.background='#fff';x.style.color='#888';x.style.borderColor='#e8ddd8';});
-      b.style.background='#C85A2A';b.style.color='#fff';b.style.borderColor='#C85A2A';
-      loginUser=u;
-    };
-    if(i===0){b.style.background='#C85A2A';b.style.color='#fff';b.style.borderColor='#C85A2A';}
-    el.appendChild(b);
-  });
+  // 사용자 선택 버튼 없음 - 비밀번호만 입력
 }
 
 function doLogin(){
   var pw=document.getElementById('loginPw').value;
-  var idx=USER_NAMES.indexOf(loginUser);
-  var correct=USER_PWS[idx]||'1234';
-  if(pw===correct){
-    CU=loginUser;localStorage.setItem('wU',CU);
+  // 입력한 비밀번호와 일치하는 사용자 찾기
+  var matchIdx=-1;
+  for(var i=0;i<USER_PWS.length;i++){
+    if((USER_PWS[i]||'1234')===pw){ matchIdx=i; break; }
+  }
+  if(matchIdx>=0){
+    CU=USER_NAMES[matchIdx];localStorage.setItem('wU',CU);
     document.getElementById('loginScreen').style.display='none';
     initU();
   } else {
