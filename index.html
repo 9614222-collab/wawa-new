@@ -459,8 +459,31 @@ var lf = 'all', ls = 'name', isrt = 'name';
 var cnSid = null, pendIn = null;
 var edKey = null, edIdx = -1;
 
-var USER_NAMES = JSON.parse(localStorage.getItem('wUN') || '["선생님1","선생님2","선생님3","선생님4","선생님5"]');
-var USER_PWS = JSON.parse(localStorage.getItem('wUP') || '["1234","1234","1234","1234","1234"]');
+var USER_NAMES = JSON.parse(localStorage.getItem('wUN') || localStorage.getItem('wUserNames') || '["선생님1","선생님2","선생님3","선생님4","선생님5"]');
+var USER_PWS = JSON.parse(localStorage.getItem('wUP') || localStorage.getItem('wUserPws') || '["1234","1234","1234","1234","1234"]');
+
+// 이전 버전 데이터 마이그레이션
+function migrateOldData() {
+  // 이전 키들로 저장된 데이터 불러오기
+  var oldStudents = localStorage.getItem('wawaStudents');
+  var oldSchedule = localStorage.getItem('wawaSchedule');
+  var oldCounsel = localStorage.getItem('wawaCounsel');
+  if (oldStudents && oldStudents !== '[]') {
+    try {
+      var arr = JSON.parse(oldStudents);
+      if (arr.length > 0) {
+        SS = arr;
+        console.log('이전 학생 데이터 복구:', arr.length + '명');
+      }
+    } catch(e) {}
+  }
+  if (oldSchedule && oldSchedule !== '{}') {
+    try { SC = JSON.parse(oldSchedule); } catch(e) {}
+  }
+  if (oldCounsel && oldCounsel !== '{}') {
+    try { CD = JSON.parse(oldCounsel); } catch(e) {}
+  }
+}
 
 var COLS = ['#C85A2A','#4A90D9','#2DAA72','#9B59B6','#E67E22','#E84393','#16A085','#2C3E50'];
 var DAYS = ['월','화','수','목','금','토'];
@@ -521,21 +544,37 @@ function svCD() { db.ref('counsel').set(CD); }
 
 // Firebase 실시간 수신
 function initFirebase() {
+  // 먼저 이전 데이터 마이그레이션
+  migrateOldData();
+
   db.ref('students').on('value', function(snap) {
     var val = snap.val();
-    SS = val ? Object.values(val).sort(function(a,b){return (b.id||0)-(a.id||0);}) : [];
+    if (val) {
+      // Firebase 데이터가 있으면 Firebase 우선
+      SS = Object.values(val).sort(function(a,b){return (b.id||0)-(a.id||0);});
+    } else if (SS.length > 0) {
+      // Firebase에 없고 로컬에 있으면 Firebase에 업로드
+      var data = {};
+      SS.forEach(function(s) { data['s' + s.id] = s; });
+      db.ref('students').set(data);
+    }
     if (v('pg-list').classList.contains('on')) renderList();
     if (v('pg-inactive').classList.contains('on')) renderIn();
     if (v('pg-counsel').classList.contains('on')) renderCnSel();
   });
   db.ref('schedule').on('value', function(snap) {
     var val = snap.val();
-    if (val) SC = val;
+    if (val) {
+      SC = val;
+    } else if (Object.keys(SC).length > 0) {
+      db.ref('schedule').set(SC);
+    }
     if (v('pg-schedule').classList.contains('on')) renderSch();
   });
   db.ref('counsel').on('value', function(snap) {
     var val = snap.val();
     if (val) CD = val;
+    else if (Object.keys(CD).length > 0) db.ref('counsel').set(CD);
   });
 }
 
