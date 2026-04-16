@@ -124,9 +124,8 @@ body{font-family:'Malgun Gothic',sans-serif;background:#f7f3f0;font-size:14px;co
 <!-- 신규 등록 -->
 <div class="pg on" id="pg-register">
   <div class="card" style="background:#fff3ee;border:1.5px solid #f5c4a8;border-radius:10px;padding:11px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <span style="font-size:13px;font-weight:600;color:#C85A2A">현재 사용자:</span>
-    <div id="uBtns" style="display:flex;gap:7px;flex-wrap:wrap"></div>
-    <button onclick="editUsers()" style="font-size:11px;padding:4px 10px;border:1.5px solid #C85A2A;color:#C85A2A;border-radius:6px;background:#fff;cursor:pointer;margin-left:4px">✏️ 이름 수정</button>
+    <span style="font-size:13px;font-weight:600;color:#C85A2A">현재 사용자: <span id="curUserLabel" style="color:#333">선생님</span></span>
+    <button onclick="editUsers()" style="font-size:11px;padding:4px 10px;border:1.5px solid #C85A2A;color:#C85A2A;border-radius:6px;background:#fff;cursor:pointer">✏️ 이름 수정</button>
     <button onclick="openPwModal()" style="font-size:11px;padding:4px 10px;border:1.5px solid #888;color:#888;border-radius:6px;background:#fff;cursor:pointer">🔑 비밀번호 변경</button>
     <span style="font-size:11px;color:#aaa;margin-left:auto">5명이 함께 사용</span>
   </div>
@@ -583,16 +582,8 @@ function doLogin(){
 }
 
 function initU(){
-  var el=v('uBtns'); el.innerHTML='';
-  USER_NAMES.forEach(function(u){
-    var b=document.createElement('button');
-    b.className='fbtn'+(u===CU?' on':'');b.textContent=u;
-    b.addEventListener('click',function(){
-      CU=u;localStorage.setItem('wU',u);
-      document.querySelectorAll('#uBtns .fbtn').forEach(function(x){x.classList.toggle('on',x.textContent===u);});
-    });
-    el.appendChild(b);
-  });
+  var el=document.getElementById('curUserLabel');
+  if(el) el.textContent=CU;
 }
 
 function editUsers(){
@@ -844,7 +835,15 @@ function renderList(){
   if(!list.length){el.innerHTML='<div class="empty">해당 조건의 학생이 없습니다.</div>';return;}
   list.sort(function(a,b){
     if(ls==='name') return (a.name||'').localeCompare(b.name||'','ko');
-    if(ls==='school') return (a.school||'').localeCompare(b.school||'','ko');
+    if(ls==='school'){
+      // 학교명 먼저, 그 다음 학년 숫자 순
+      var sa=a.school||'', sb=b.school||'';
+      var sc=sa.localeCompare(sb,'ko');
+      if(sc!==0) return sc;
+      var ga=parseInt((sa.match(/(\d+)학년/)||[])[1])||0;
+      var gb=parseInt((sb.match(/(\d+)학년/)||[])[1])||0;
+      return ga-gb;
+    }
     if(ls==='pay') return (a.paid==='ok'?0:1)-(b.paid==='ok'?0:1);
     if(ls==='nopay') return (a.paid==='ok'?1:0)-(b.paid==='ok'?1:0);
     return 0;
