@@ -427,6 +427,11 @@ var SLOTS=[
   {l:'3교시',t:'18:40~20:20',bg:'#E6F1FB'},
   {l:'4교시',t:'20:20~22:00',bg:'#F0E8FA'}
 ];
+var SAT_SLOTS=[
+  {l:'토 1교시',t:'10:00~11:30',bg:'#FEF3E2'},
+  {l:'토 2교시',t:'11:30~13:00',bg:'#EAF3DE'},
+  {l:'토 3교시',t:'13:00~14:30',bg:'#E6F1FB'},
+];
 var SK=['ko','en','ma','so','sc','et'];
 var SN=['국어','영어','수학','사회','과학','기타'];
 var SC2=['#4A90D9','#2DAA72','#9B59B6','#E67E22','#E84393','#888'];
@@ -757,27 +762,51 @@ function renderSch(){
   DAYS.forEach(function(d,i){hr+='<th style="background:'+DC[i]+';border-radius:6px">'+d+'</th>';});
   th.innerHTML=hr+'</tr>';
   var bs=getBSC();var rows='';
+
+  // 평일 교시 (월~금, di 0~4)
   SLOTS.forEach(function(sl,si){
     rows+='<tr><td style="background:'+sl.bg+';border-radius:7px;padding:7px 5px;vertical-align:top"><div style="font-size:11px;font-weight:700;color:#444">'+sl.l+'</div><div style="font-size:9px;color:#999">'+sl.t+'</div></td>';
     DAYS.forEach(function(d,di){
-      var k=di+'-'+si;var cls=bs[k]||[];var cell='';
-      cls.forEach(function(c,idx){
-        var sn=[];
-        (c.stuIds||[]).forEach(function(sid){var s=SS.find(function(x){return x.id===sid;});if(s) sn.push(s.name);});
-        (c.exNm||'').split(',').forEach(function(n){if(n.trim()) sn.push(n.trim());});
-        cell+='<div class="sc-cls" style="background:'+c.color+'" onclick="openScModal('+di+','+si+','+idx+')">'
-          +'<div style="font-size:11px;font-weight:700;color:#fff;margin-bottom:2px">'+c.cn+'</div>'
-          +(c.time?'<div style="font-size:9px;color:rgba(255,255,255,.85)">⏰ '+c.time+'</div>':'')
-          +(c.tch?'<div style="font-size:9px;color:rgba(255,255,255,.85)">👤 '+c.tch+'</div>':'')
-          +(sn.length?'<div style="font-size:9px;color:rgba(255,255,255,.9);margin-top:2px">'+sn.join(', ')+'</div>':'')
-          +'<button onclick="event.stopPropagation();delSlt('+di+','+si+','+idx+')" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.2);border:none;border-radius:50%;width:14px;height:14px;color:#fff;font-size:9px;cursor:pointer;line-height:1;padding:0">×</button>'
-          +'</div>';
-      });
-      cell+='<button class="sc-add" onclick="openScModal('+di+','+si+')">+ 추가</button>';
-      rows+='<td style="vertical-align:top;padding:3px">'+cell+'</td>';
+      if(di===5){
+        // 토요일: SAT_SLOTS 사용
+        var k='5-sat-'+si;var cls=bs[k]||[];var cell='';
+        if(si<SAT_SLOTS.length){
+          cls.forEach(function(c,idx){
+            var sn=[];
+            (c.stuIds||[]).forEach(function(sid){var s=SS.find(function(x){return x.id===sid;});if(s) sn.push(s.name);});
+            (c.exNm||'').split(',').forEach(function(n){if(n.trim()) sn.push(n.trim());});
+            cell+='<div class="sc-cls" style="background:'+c.color+'" onclick="openScModal(5,\'sat-'+si+'\','+idx+')">'
+              +'<div style="font-size:11px;font-weight:700;color:#fff;margin-bottom:2px">'+c.cn+'</div>'
+              +(c.time?'<div style="font-size:9px;color:rgba(255,255,255,.85)">⏰ '+c.time+'</div>':'')
+              +(c.tch?'<div style="font-size:9px;color:rgba(255,255,255,.85)">👤 '+c.tch+'</div>':'')
+              +(sn.length?'<div style="font-size:9px;color:rgba(255,255,255,.9);margin-top:2px">'+sn.join(', ')+'</div>':'')
+              +'<button onclick="event.stopPropagation();delSlt(5,\'sat-'+si+'\','+idx+')" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.2);border:none;border-radius:50%;width:14px;height:14px;color:#fff;font-size:9px;cursor:pointer;line-height:1;padding:0">×</button>'
+              +'</div>';
+          });
+          cell+='<button class="sc-add" onclick="openScModal(5,\'sat-'+si+'\')">+ 추가</button>';
+        }
+        rows+='<td style="vertical-align:top;padding:3px">'+cell+'</td>';
+      } else {
+        var k=di+'-'+si;var cls=bs[k]||[];var cell='';
+        cls.forEach(function(c,idx){
+          var sn=[];
+          (c.stuIds||[]).forEach(function(sid){var s=SS.find(function(x){return x.id===sid;});if(s) sn.push(s.name);});
+          (c.exNm||'').split(',').forEach(function(n){if(n.trim()) sn.push(n.trim());});
+          cell+='<div class="sc-cls" style="background:'+c.color+'" onclick="openScModal('+di+','+si+','+idx+')">'
+            +'<div style="font-size:11px;font-weight:700;color:#fff;margin-bottom:2px">'+c.cn+'</div>'
+            +(c.time?'<div style="font-size:9px;color:rgba(255,255,255,.85)">⏰ '+c.time+'</div>':'')
+            +(c.tch?'<div style="font-size:9px;color:rgba(255,255,255,.85)">👤 '+c.tch+'</div>':'')
+            +(sn.length?'<div style="font-size:9px;color:rgba(255,255,255,.9);margin-top:2px">'+sn.join(', ')+'</div>':'')
+            +'<button onclick="event.stopPropagation();delSlt('+di+','+si+','+idx+')" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.2);border:none;border-radius:50%;width:14px;height:14px;color:#fff;font-size:9px;cursor:pointer;line-height:1;padding:0">×</button>'
+            +'</div>';
+        });
+        cell+='<button class="sc-add" onclick="openScModal('+di+','+si+')">+ 추가</button>';
+        rows+='<td style="vertical-align:top;padding:3px">'+cell+'</td>';
+      }
     });
     rows+='</tr>';
   });
+
   tb.innerHTML=rows;
   var leg=v('scLeg');if(!leg) return;var seen={};
   Object.values(getBSC()).forEach(function(arr){arr.forEach(function(c){if(!seen[c.cn]) seen[c.cn]=c.color;});});
